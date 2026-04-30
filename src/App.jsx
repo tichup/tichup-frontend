@@ -1,14 +1,13 @@
-import './App.css'
+import { useState } from "react"
+import Landing from "./components/Landing"
+import RoundCalculator from "./components/RoundCalculator"
 
 function App() {
-  return (
-    <main className="app">
-      <h1 className="app-title">Tichup</h1>
-      <p className="app-subtitle">Welcome to Tichup!</p>
-      <button type="button" className="start-button">
-        START
-      </button>
-    </main>
+  const [started, setStarted] = useState(false)
+  return started ? (
+    <RoundCalculator />
+  ) : (
+    <Landing onStart={() => setStarted(true)} />
   )
 }
 
