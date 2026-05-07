@@ -394,7 +394,8 @@
 .team-name {
   margin: 0.5rem 0 1rem;
   color: #f4f7fb;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
+  font-weight: 600;
 }
 
 .round-title {
