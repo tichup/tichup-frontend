@@ -23,9 +23,9 @@ function getSliderFillPercent(value) {
 
 function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   const [roundForm, setRoundForm] = useState(initialRoundForm);
-  const [calculationResult, setCalculationResult] = useState(null);
   const [toastState, setToastState] = useState({ type: "", messages: [] });
   const [savedRounds, setSavedRounds] = useState([]);
+  const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
 
   const playerRanks = useMemo(
     () =>
@@ -84,39 +84,36 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
 
   function resetRoundForm() {
     setRoundForm(initialRoundForm);
-    setCalculationResult(null);
     setToastState({ type: "", messages: [] });
   }
 
-  function handleCalculateRound() {
-    const result = calculateRoundScore({
+  function openRoundModal() {
+    resetRoundForm();
+    setIsRoundModalOpen(true);
+  }
+
+  function closeRoundModal() {
+    resetRoundForm();
+    setIsRoundModalOpen(false);
+  }
+
+  function getRoundCalculation() {
+    return calculateRoundScore({
       teams: gameConfig.teams,
       players: gameConfig.players,
       rankings: roundForm.rankings,
       points: roundForm.points,
       tichu: roundForm.tichu,
     });
-
-    setCalculationResult(result);
-
-    if (result.isValid) {
-      setToastState({
-        type: "success",
-        messages: ["계산이 완료되었습니다."],
-      });
-    } else {
-      setToastState({
-        type: "error",
-        messages: ["입력값을 다시 확인해주세요.", ...result.issues],
-      });
-    }
   }
 
   function handleSaveRound() {
-    if (!calculationResult?.isValid) {
+    const result = getRoundCalculation();
+
+    if (!result.isValid) {
       setToastState({
         type: "error",
-        messages: ["저장하기 전에 유효한 라운드 계산이 필요합니다."],
+        messages: ["입력값을 다시 확인해주세요.", ...result.issues],
       });
       return;
     }
@@ -128,17 +125,22 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
         rankings: [...roundForm.rankings],
         points: [...roundForm.points],
         tichu: [...roundForm.tichu],
-        totalEnteredPoints: calculationResult.totalEnteredPoints,
-        playerResults: calculationResult.playerResults,
-        teamScores: calculationResult.teamScores,
+        totalEnteredPoints: result.totalEnteredPoints,
+        playerResults: result.playerResults,
+        teamScores: result.teamScores,
       },
     ]);
 
-    resetRoundForm();
+    setRoundForm(initialRoundForm);
+    setIsRoundModalOpen(false);
     setToastState({
       type: "success",
       messages: ["라운드를 저장했습니다."],
     });
+  }
+
+  function handleResetRoundForm() {
+    resetRoundForm();
   }
 
   useEffect(() => {
@@ -197,170 +199,6 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
           ))}
         </div>
 
-        <section className="round-form-section">
-          <div className="section-heading">
-            <div>
-              <p className="panel-eyebrow">Round Input</p>
-              <h2 className="round-title">첫 번째 라운드 입력</h2>
-            </div>
-            <button type="button" className="secondary-button" onClick={resetRoundForm}>
-              입력 초기화
-            </button>
-          </div>
-
-          <div className="round-grid">
-            <section className="round-block round-block-full">
-              <h3 className="block-title">플레이어별 입력</h3>
-              <div className="player-input-list">
-                {gameConfig.players.map((player, playerIndex) => (
-                  <article key={player.id} className="player-input-card">
-                    <div className="player-input-header">
-                      <strong>{player.name}</strong>
-                      <span>{gameConfig.teams[player.teamId].name}</span>
-                    </div>
-
-                    <div className="field-grid compact-grid">
-                      <div className="field">
-                        <span>순위</span>
-                        <div className="rank-toggle-group" role="radiogroup" aria-label={`${player.name} 순위 선택`}>
-                          {["1", "2", "3", "4"].map((rankValue) => (
-                            <button
-                              key={rankValue}
-                              type="button"
-                              role="radio"
-                              aria-checked={playerRanks[playerIndex] === rankValue}
-                              className={`rank-toggle-button ${
-                                playerRanks[playerIndex] === rankValue ? "active" : ""
-                              }`}
-                              onClick={() =>
-                                updatePlayerRank(
-                                  playerIndex,
-                                  playerRanks[playerIndex] === rankValue ? "" : rankValue,
-                                )
-                              }
-                            >
-                              {rankValue}등
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <label className="field">
-                        <span>획득 점수</span>
-                        <div className="score-slider-group">
-                          <div className="score-slider-header">
-                            <strong className="score-value">{roundForm.points[playerIndex]}점</strong>
-                          </div>
-                          <input
-                            className="score-slider"
-                            type="range"
-                            min="-25"
-                            max="100"
-                            step="5"
-                            value={roundForm.points[playerIndex]}
-                            onChange={(event) => updatePoint(playerIndex, event.target.value)}
-                            style={{
-                              "--fill-percent": `${getSliderFillPercent(roundForm.points[playerIndex])}%`,
-                            }}
-                          />
-                          <div className="score-slider-scale">
-                            <span>-25</span>
-                            <span>100</span>
-                          </div>
-                        </div>
-                      </label>
-
-                      <div className="field field-full">
-                        <span>티츄 선언</span>
-                        <div className="tichu-toggle-grid">
-                          {tichuOptions.map((option) => (
-                            <button
-                              key={option.value}
-                              type="button"
-                              className={`tichu-toggle-button ${
-                                roundForm.tichu[playerIndex] === option.value ? "active" : ""
-                              }`}
-                              onClick={() => updateTichu(playerIndex, option.value)}
-                            >
-                              {option.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
-          </div>
-        </section>
-
-        <section className="round-result-section">
-          <div className="section-heading">
-            <div>
-              <p className="panel-eyebrow">Calculation</p>
-              <h2 className="round-title">라운드 계산 결과</h2>
-            </div>
-            <div className="action-row">
-              <button type="button" className="primary-button" onClick={handleCalculateRound}>
-                라운드 계산
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={handleSaveRound}
-                disabled={!calculationResult?.isValid}
-              >
-                라운드 저장
-              </button>
-            </div>
-          </div>
-
-          {calculationResult ? (
-            <div className="result-stack">
-              <div className="result-grid">
-                <div className="result-card">
-                  <h3 className="block-title">팀별 점수</h3>
-                  <ul className="preview-list">
-                    {calculationResult.teamScores.map((teamScore) => (
-                      <li key={teamScore.teamId}>
-                        {teamScore.teamName}: 기본 {teamScore.basePoints}점 / 티츄{" "}
-                        {teamScore.tichuPoints}점 / 합계 {teamScore.totalPoints}점
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="result-card">
-                  <h3 className="block-title">플레이어별 반영 결과</h3>
-                  <ul className="preview-list">
-                    {calculationResult.playerResults.map((playerResult) => (
-                      <li key={playerResult.playerId}>
-                        {playerResult.playerName}: 순위 {playerResult.rank ?? "-"} / 기본{" "}
-                        {playerResult.basePoints}점 / 티츄 {playerResult.tichuDelta}점 / 합계{" "}
-                        {playerResult.totalPoints}점
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="result-card">
-                <h3 className="block-title">입력 점수 합계</h3>
-                <p className="result-summary">
-                  현재 플레이어별 획득 점수 총합은 {calculationResult.totalEnteredPoints}점입니다.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="result-card">
-              <p className="result-summary">
-                `라운드 계산` 버튼을 누르면 팀별 점수와 플레이어별 반영 결과가 여기에 표시됩니다.
-              </p>
-            </div>
-          )}
-        </section>
-
         <section className="round-history-section">
           <div className="section-heading">
             <div>
@@ -409,6 +247,10 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
               <p className="result-summary">아직 저장된 라운드가 없습니다.</p>
             </div>
           )}
+
+          <button type="button" className="add-round-button" onClick={openRoundModal} aria-label="라운드 추가">
+            +
+          </button>
         </section>
 
         <div className="button-row">
@@ -420,6 +262,124 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
           </button>
         </div>
       </section>
+
+      {isRoundModalOpen ? (
+        <div className="modal-backdrop" onClick={closeRoundModal}>
+          <section
+            className="modal-panel"
+            onClick={(event) => event.stopPropagation()}
+            aria-modal="true"
+            role="dialog"
+          >
+            <div className="section-heading">
+              <div>
+                <p className="panel-eyebrow">Round Input</p>
+                <h2 className="round-title">새 라운드 입력</h2>
+              </div>
+              <div className="action-row">
+                <button type="button" className="secondary-button" onClick={handleResetRoundForm}>
+                  입력 초기화
+                </button>
+                <button type="button" className="secondary-button" onClick={closeRoundModal}>
+                  닫기
+                </button>
+              </div>
+            </div>
+
+            <section className="round-form-section modal-section">
+              <section className="round-block round-block-full">
+                <h3 className="block-title">플레이어별 입력</h3>
+                <div className="player-input-list">
+                  {gameConfig.players.map((player, playerIndex) => (
+                    <article key={player.id} className="player-input-card">
+                      <div className="player-input-header">
+                        <strong>{player.name}</strong>
+                        <span>{gameConfig.teams[player.teamId].name}</span>
+                      </div>
+
+                      <div className="field-grid compact-grid">
+                        <div className="field">
+                          <span>순위</span>
+                          <div className="rank-toggle-group" role="radiogroup" aria-label={`${player.name} 순위 선택`}>
+                            {["1", "2", "3", "4"].map((rankValue) => (
+                              <button
+                                key={rankValue}
+                                type="button"
+                                role="radio"
+                                aria-checked={playerRanks[playerIndex] === rankValue}
+                                className={`rank-toggle-button ${
+                                  playerRanks[playerIndex] === rankValue ? "active" : ""
+                                }`}
+                                onClick={() =>
+                                  updatePlayerRank(
+                                    playerIndex,
+                                    playerRanks[playerIndex] === rankValue ? "" : rankValue,
+                                  )
+                                }
+                              >
+                                {rankValue}등
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <label className="field">
+                          <span>획득 점수</span>
+                          <div className="score-slider-group">
+                            <div className="score-slider-header">
+                              <strong className="score-value">{roundForm.points[playerIndex]}점</strong>
+                            </div>
+                            <input
+                              className="score-slider"
+                              type="range"
+                              min="-25"
+                              max="100"
+                              step="5"
+                              value={roundForm.points[playerIndex]}
+                              onChange={(event) => updatePoint(playerIndex, event.target.value)}
+                              style={{
+                                "--fill-percent": `${getSliderFillPercent(roundForm.points[playerIndex])}%`,
+                              }}
+                            />
+                            <div className="score-slider-scale">
+                              <span>-25</span>
+                              <span>100</span>
+                            </div>
+                          </div>
+                        </label>
+
+                        <div className="field field-full">
+                          <span>티츄 선언</span>
+                          <div className="tichu-toggle-grid">
+                            {tichuOptions.map((option) => (
+                              <button
+                                key={option.value}
+                                type="button"
+                                className={`tichu-toggle-button ${
+                                  roundForm.tichu[playerIndex] === option.value ? "active" : ""
+                                }`}
+                                onClick={() => updateTichu(playerIndex, option.value)}
+                              >
+                                {option.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            </section>
+
+            <div className="modal-footer">
+              <button type="button" className="primary-button" onClick={handleSaveRound}>
+                저장
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }
