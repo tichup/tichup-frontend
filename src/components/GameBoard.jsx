@@ -527,7 +527,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                       </div>
 
                       <div className="field-grid compact-grid">
-                        <div className="field">
+                        <div className="field rank-field">
                           <span>순위</span>
                           <div
                             className="rank-toggle-group"

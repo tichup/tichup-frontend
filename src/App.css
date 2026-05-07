@@ -243,6 +243,10 @@
   font-weight: 500;
 }
 
+.modal-panel .action-row .secondary-button {
+  font-weight: 400;
+}
+
 /* Tabs */
 .board-tabs {
   display: flex;
@@ -511,6 +515,10 @@
   font-size: 0.95rem;
 }
 
+.rank-field {
+  gap: 0.35rem;
+}
+
 .field input,
 .field select {
   width: 100%;
@@ -571,12 +579,6 @@
 .player-input-header span {
   color: #9ea7b3;
   font-size: 0.92rem;
-}
-
-.player-team-inline::before {
-  content: "·";
-  margin: 0 0.45rem 0 0.35rem;
-  color: rgba(255, 255, 255, 0.28);
 }
 
 .score-slider-group,
