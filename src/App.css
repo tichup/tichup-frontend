@@ -181,6 +181,44 @@
   margin-top: 1.5rem;
 }
 
+.round-progress-label {
+  display: block;
+  color: #9ea7b3;
+  font-size: 0.9rem;
+}
+
+.round-progress-value {
+  display: block;
+  margin-top: 0.55rem;
+  color: #f4f7fb;
+  font-size: 1.15rem;
+}
+
+.round-form-status {
+  margin-right: auto;
+}
+
+.round-status-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.75rem;
+  padding: 0.38rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.round-status-badge.is-ready {
+  background: rgba(88, 164, 118, 0.18);
+  color: #cdebd8;
+}
+
+.round-status-badge.is-pending {
+  background: rgba(217, 175, 86, 0.16);
+  color: #f7e4b0;
+}
+
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -292,6 +330,12 @@
 .secondary-button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  box-shadow: none;
 }
 
 .secondary-button:hover,

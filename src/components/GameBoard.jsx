@@ -98,6 +98,16 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
     [gameConfig.players, roundForm.rankings],
   );
 
+  const totalEnteredPoints = useMemo(
+    () => roundForm.points.reduce((sum, value) => sum + Number(value), 0),
+    [roundForm.points],
+  );
+
+  const hasAllRanksSelected = useMemo(
+    () => roundForm.rankings.every((value) => value !== ""),
+    [roundForm.rankings],
+  );
+
   const teamTotals = useMemo(
     () =>
       gameConfig.teams.map((team) => {
@@ -121,6 +131,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   );
 
   const isEditingRound = editingRoundId !== null;
+  const isRoundReadyToSave = totalEnteredPoints === 100 && hasAllRanksSelected;
 
   function updatePoint(playerIndex, value) {
     setRoundForm((current) => {
@@ -196,6 +207,14 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   }
 
   function handleSaveRound() {
+    if (!isRoundReadyToSave) {
+      setToastState({
+        type: "error",
+        messages: ["순위를 모두 선택하고 점수 합계를 100점으로 맞춰주세요."],
+      });
+      return;
+    }
+
     if (winnerSummary.hasWinner && !isEditingRound) {
       setToastState({
         type: "error",
@@ -570,7 +589,23 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
             </section>
 
             <div className="modal-footer">
-              <button type="button" className="primary-button" onClick={handleSaveRound}>
+              <div className="round-form-status">
+                <span className="round-progress-label">
+                  {isEditingRound ? `라운드 ${editingRoundId} 수정 중` : "새 라운드 작성 중"}
+                </span>
+                <strong className="round-progress-value">
+                  {totalEnteredPoints} / 100점
+                  <span className={`round-status-badge ${hasAllRanksSelected ? "is-ready" : "is-pending"}`}>
+                    {hasAllRanksSelected ? "순위 완료" : "순위 필요"}
+                  </span>
+                </strong>
+              </div>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={handleSaveRound}
+                disabled={!isRoundReadyToSave}
+              >
                 저장
               </button>
             </div>
