@@ -54,6 +54,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   const [toastState, setToastState] = useState({ type: "", messages: [] });
   const [savedRounds, setSavedRounds] = useState([]);
   const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
+  const [editingRoundId, setEditingRoundId] = useState(null);
   const [isWinnerCelebrationOpen, setIsWinnerCelebrationOpen] = useState(false);
 
   const playerRanks = useMemo(
@@ -87,6 +88,8 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
     [gameConfig.targetScore, teamTotals],
   );
 
+  const isEditingRound = editingRoundId !== null;
+
   function updatePoint(playerIndex, value) {
     setRoundForm((current) => {
       const points = [...current.points];
@@ -119,6 +122,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
 
   function resetRoundForm() {
     setRoundForm(initialRoundForm);
+    setEditingRoundId(null);
   }
 
   function openRoundModal() {
@@ -131,6 +135,16 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
     }
 
     resetRoundForm();
+    setIsRoundModalOpen(true);
+  }
+
+  function openEditRoundModal(round) {
+    setRoundForm({
+      rankings: [...round.rankings],
+      points: [...round.points],
+      tichu: [...round.tichu],
+    });
+    setEditingRoundId(round.id);
     setIsRoundModalOpen(true);
   }
 
@@ -150,7 +164,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   }
 
   function handleSaveRound() {
-    if (winnerSummary.hasWinner) {
+    if (winnerSummary.hasWinner && !isEditingRound) {
       setToastState({
         type: "error",
         messages: ["게임이 이미 종료되었습니다. 새로운 라운드는 추가할 수 없습니다."],
@@ -168,28 +182,46 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
       return;
     }
 
-    setSavedRounds((current) => [
-      ...current,
-      {
-        id: current.length + 1,
+    setSavedRounds((current) => {
+      const nextRound = {
+        id: isEditingRound ? editingRoundId : current.length + 1,
         rankings: [...roundForm.rankings],
         points: [...roundForm.points],
         tichu: [...roundForm.tichu],
         totalEnteredPoints: result.totalEnteredPoints,
         playerResults: result.playerResults,
         teamScores: result.teamScores,
-      },
-    ]);
+      };
+
+      if (isEditingRound) {
+        return current.map((round) => (round.id === editingRoundId ? nextRound : round));
+      }
+
+      return [...current, nextRound];
+    });
 
     setRoundForm(initialRoundForm);
+    setEditingRoundId(null);
     setIsRoundModalOpen(false);
     setToastState({
       type: "success",
-      messages: ["라운드를 저장했습니다."],
+      messages: [isEditingRound ? "라운드를 수정했습니다." : "라운드를 저장했습니다."],
     });
   }
 
   function handleResetRoundForm() {
+    if (isEditingRound) {
+      const roundToEdit = savedRounds.find((round) => round.id === editingRoundId);
+      if (roundToEdit) {
+        setRoundForm({
+          rankings: [...roundToEdit.rankings],
+          points: [...roundToEdit.points],
+          tichu: [...roundToEdit.tichu],
+        });
+      }
+      return;
+    }
+
     resetRoundForm();
   }
 
@@ -289,8 +321,19 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
               {savedRounds.map((round) => (
                 <article key={round.id} className="history-card">
                   <div className="history-header">
-                    <h3 className="block-title">라운드 {round.id}</h3>
-                    <span className="history-meta">입력 점수 합계 {round.totalEnteredPoints}점</span>
+                    <div>
+                      <h3 className="block-title">라운드 {round.id}</h3>
+                      <span className="history-meta">입력 점수 합계 {round.totalEnteredPoints}점</span>
+                    </div>
+                    <div className="history-action-row">
+                      <button
+                        type="button"
+                        className="secondary-button history-edit-button"
+                        onClick={() => openEditRoundModal(round)}
+                      >
+                        수정
+                      </button>
+                    </div>
                   </div>
 
                   <div className="result-grid">
@@ -357,7 +400,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
             <div className="section-heading">
               <div>
                 <p className="panel-eyebrow">Round Input</p>
-                <h2 className="round-title">새 라운드 입력</h2>
+                <h2 className="round-title">{isEditingRound ? "라운드 수정" : "새 라운드 입력"}</h2>
               </div>
               <div className="action-row">
                 <button type="button" className="secondary-button" onClick={handleResetRoundForm}>
