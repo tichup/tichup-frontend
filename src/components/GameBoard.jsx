@@ -21,11 +21,40 @@ function getSliderFillPercent(value) {
   return ((Number(value) - min) / (max - min)) * 100;
 }
 
+function getWinnerSummary(teamTotals, targetScore) {
+  const sorted = [...teamTotals].sort((a, b) => b.totalPoints - a.totalPoints);
+  const topTeam = sorted[0];
+  const secondTeam = sorted[1];
+
+  if (!topTeam || topTeam.totalPoints < targetScore) {
+    return {
+      hasWinner: false,
+      isTieAtTarget: false,
+      winnerTeam: null,
+    };
+  }
+
+  if (secondTeam && secondTeam.totalPoints === topTeam.totalPoints) {
+    return {
+      hasWinner: false,
+      isTieAtTarget: true,
+      winnerTeam: null,
+    };
+  }
+
+  return {
+    hasWinner: true,
+    isTieAtTarget: false,
+    winnerTeam: topTeam,
+  };
+}
+
 function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   const [roundForm, setRoundForm] = useState(initialRoundForm);
   const [toastState, setToastState] = useState({ type: "", messages: [] });
   const [savedRounds, setSavedRounds] = useState([]);
   const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
+  const [isWinnerCelebrationOpen, setIsWinnerCelebrationOpen] = useState(false);
 
   const playerRanks = useMemo(
     () =>
@@ -46,10 +75,16 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
 
         return {
           teamId: team.id,
+          teamName: team.name,
           totalPoints,
         };
       }),
     [gameConfig.teams, savedRounds],
+  );
+
+  const winnerSummary = useMemo(
+    () => getWinnerSummary(teamTotals, gameConfig.targetScore),
+    [gameConfig.targetScore, teamTotals],
   );
 
   function updatePoint(playerIndex, value) {
@@ -84,10 +119,17 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
 
   function resetRoundForm() {
     setRoundForm(initialRoundForm);
-    setToastState({ type: "", messages: [] });
   }
 
   function openRoundModal() {
+    if (winnerSummary.hasWinner) {
+      setToastState({
+        type: "error",
+        messages: ["게임이 이미 종료되었습니다. 새로운 라운드는 추가할 수 없습니다."],
+      });
+      return;
+    }
+
     resetRoundForm();
     setIsRoundModalOpen(true);
   }
@@ -108,6 +150,14 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   }
 
   function handleSaveRound() {
+    if (winnerSummary.hasWinner) {
+      setToastState({
+        type: "error",
+        messages: ["게임이 이미 종료되었습니다. 새로운 라운드는 추가할 수 없습니다."],
+      });
+      return;
+    }
+
     const result = getRoundCalculation();
 
     if (!result.isValid) {
@@ -155,6 +205,15 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
     return () => window.clearTimeout(timeoutId);
   }, [toastState]);
 
+  useEffect(() => {
+    if (winnerSummary.hasWinner) {
+      setIsWinnerCelebrationOpen(true);
+      return;
+    }
+
+    setIsWinnerCelebrationOpen(false);
+  }, [winnerSummary.hasWinner]);
+
   return (
     <main className="screen">
       {toastState.messages.length ? (
@@ -171,15 +230,33 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
         <div className="panel-header">
           <div>
             <p className="panel-eyebrow">Game Board</p>
-            <h1 className="panel-title">이제 라운드 점수를 입력할 준비가 되었습니다.</h1>
+            <h1 className="panel-title">라운드를 기록하고 승패를 확인하세요</h1>
             <p className="panel-description">
-              이번 단계에서는 라운드 입력 폼을 먼저 붙입니다. 아직 계산 로직은 연결하지 않고,
-              어떤 데이터를 받을지 화면에서 안정적으로 정리하는 데 집중합니다.
+              저장된 라운드를 기준으로 누적 점수를 계산합니다. 목표 점수에 먼저 도달한 팀이
+              더 높은 점수라면 게임이 종료되고 더 이상 라운드를 추가할 수 없습니다.
             </p>
           </div>
 
           <div className="target-chip">목표 {gameConfig.targetScore}점</div>
         </div>
+
+        {winnerSummary.hasWinner ? (
+          <section className="winner-banner">
+            <p className="winner-label">Winner</p>
+            <h2 className="winner-title">{winnerSummary.winnerTeam.teamName} 승리</h2>
+            <p className="winner-description">
+              최종 누적 점수 {winnerSummary.winnerTeam.totalPoints}점으로 목표 점수에 도달했습니다.
+            </p>
+          </section>
+        ) : winnerSummary.isTieAtTarget ? (
+          <section className="winner-banner winner-banner-muted">
+            <p className="winner-label">Tie</p>
+            <h2 className="winner-title">동점 상태입니다</h2>
+            <p className="winner-description">
+              목표 점수에 도달했지만 동점이라 우승 팀이 아직 정해지지 않았습니다.
+            </p>
+          </section>
+        ) : null}
 
         <div className="board-grid">
           {gameConfig.teams.map((team) => (
@@ -248,7 +325,13 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
             </div>
           )}
 
-          <button type="button" className="add-round-button" onClick={openRoundModal} aria-label="라운드 추가">
+          <button
+            type="button"
+            className="add-round-button"
+            onClick={openRoundModal}
+            aria-label="라운드 추가"
+            disabled={winnerSummary.hasWinner}
+          >
             +
           </button>
         </section>
@@ -300,7 +383,11 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                       <div className="field-grid compact-grid">
                         <div className="field">
                           <span>순위</span>
-                          <div className="rank-toggle-group" role="radiogroup" aria-label={`${player.name} 순위 선택`}>
+                          <div
+                            className="rank-toggle-group"
+                            role="radiogroup"
+                            aria-label={`${player.name} 순위 선택`}
+                          >
                             {["1", "2", "3", "4"].map((rankValue) => (
                               <button
                                 key={rankValue}
@@ -377,6 +464,38 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                 저장
               </button>
             </div>
+          </section>
+        </div>
+      ) : null}
+
+      {isWinnerCelebrationOpen && winnerSummary.hasWinner ? (
+        <div className="celebration-backdrop" onClick={() => setIsWinnerCelebrationOpen(false)}>
+          <section
+            className="celebration-panel"
+            onClick={(event) => event.stopPropagation()}
+            aria-modal="true"
+            role="dialog"
+          >
+            <div className="fireworks-layer" aria-hidden="true">
+              <span className="firework firework-left" />
+              <span className="firework firework-center" />
+              <span className="firework firework-right" />
+            </div>
+
+            <p className="celebration-eyebrow">Victory</p>
+            <h2 className="celebration-title">{winnerSummary.winnerTeam.teamName} 우승</h2>
+            <p className="celebration-description">
+              목표 점수 {gameConfig.targetScore}점을 넘기며 최종 {winnerSummary.winnerTeam.totalPoints}
+              점을 기록했습니다.
+            </p>
+
+            <button
+              type="button"
+              className="primary-button celebration-close-button"
+              onClick={() => setIsWinnerCelebrationOpen(false)}
+            >
+              확인
+            </button>
           </section>
         </div>
       ) : null}

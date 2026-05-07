@@ -6,8 +6,8 @@ import GameBoard from "./components/GameBoard";
 const initialGameConfig = {
   targetScore: 1000,
   teams: [
-    { id: 0, name: "옥 팀", playerIds: [0, 1] },
-    { id: 1, name: "별 팀", playerIds: [2, 3] },
+    { id: 0, name: "청룡 팀", playerIds: [0, 1] },
+    { id: 1, name: "백호 팀", playerIds: [2, 3] },
   ],
   players: [
     { id: 0, name: "플레이어 1", teamId: 0 },
