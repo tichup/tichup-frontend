@@ -43,7 +43,7 @@ function GameSetup({ initialConfig, onBack, onStartGame }) {
   }
 
   return (
-    <main className="screen">
+    <main className="screen setup-screen">
       <section className="panel setup-panel">
         <div className="panel-header">
           <div>

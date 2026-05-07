@@ -64,11 +64,12 @@
 
 /* Layout */
 .screen {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  box-sizing: border-box;
 }
 
 .panel {
@@ -99,7 +100,7 @@
 .panel-title {
   margin: 0;
   color: #f4f7fb;
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-size: clamp(1.5rem, 3vw, 2rem);
   line-height: 1.25;
 }
 
@@ -307,6 +308,11 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.03);
+}
+
+.stats-summary-card {
+  padding-top: 0.5rem;
+  padding-bottom: 0.75rem;
 }
 
 .team-block {
@@ -1187,7 +1193,7 @@
   }
 
   .panel {
-    padding: 1rem;
+    padding: 1.25rem 1rem;
     border-radius: 22px;
   }
 
@@ -1225,17 +1231,17 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .setup-screen {
+    align-items: center;
+    justify-content: center;
+  }
+
   .stats-summary-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .stats-summary-label {
     font-size: 0.76rem;
-  }
-
-  .stats-summary-card {
-    padding-top: 0.9rem;
-    padding-bottom: 0.9rem;
   }
 
   .stats-summary-value {
@@ -1311,12 +1317,16 @@
   .team-card,
   .round-block,
   .result-card,
-  .stats-summary-card,
   .stats-card,
   .player-input-card,
   .history-card,
   .stats-detail-item {
     padding: 1rem;
+    border-radius: 18px;
+  }
+
+  .stats-summary-card {
+    padding: 0.5rem 1rem;
     border-radius: 18px;
   }
 
