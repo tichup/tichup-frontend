@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "../App.css";
+import { calculateRoundScore } from "../calculateRoundScore";
 
 const initialRoundForm = {
   rankings: ["", "", "", ""],
@@ -22,21 +23,14 @@ function getSliderFillPercent(value) {
 
 function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   const [roundForm, setRoundForm] = useState(initialRoundForm);
+  const [calculationResult, setCalculationResult] = useState(null);
+  const [toastState, setToastState] = useState({ type: "", messages: [] });
 
   const playerRanks = useMemo(
     () =>
       gameConfig.players.map((player) => {
         const rankIndex = roundForm.rankings.findIndex((playerId) => String(player.id) === playerId);
         return rankIndex >= 0 ? String(rankIndex + 1) : "";
-      }),
-    [gameConfig.players, roundForm.rankings],
-  );
-
-  const rankingNames = useMemo(
-    () =>
-      roundForm.rankings.map((playerId) => {
-        const player = gameConfig.players.find((item) => String(item.id) === playerId);
-        return player?.name ?? "-";
       }),
     [gameConfig.players, roundForm.rankings],
   );
@@ -73,10 +67,58 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
 
   function resetRoundForm() {
     setRoundForm(initialRoundForm);
+    setCalculationResult(null);
+    setToastState({ type: "", messages: [] });
   }
+
+  function handleCalculateRound() {
+    const result = calculateRoundScore({
+      teams: gameConfig.teams,
+      players: gameConfig.players,
+      rankings: roundForm.rankings,
+      points: roundForm.points,
+      tichu: roundForm.tichu,
+    });
+
+    setCalculationResult(result);
+
+    if (result.isValid) {
+      setToastState({
+        type: "success",
+        messages: ["계산이 완료되었습니다."],
+      });
+    } else {
+      setToastState({
+        type: "error",
+        messages: ["입력값을 다시 확인해주세요.", ...result.issues],
+      });
+    }
+  }
+
+  useEffect(() => {
+    if (toastState.messages.length === 0) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setToastState({ type: "", messages: [] });
+    }, 2600);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [toastState]);
 
   return (
     <main className="screen">
+      {toastState.messages.length ? (
+        <div className={`toast-message toast-${toastState.type}`}>
+          {toastState.messages.map((message) => (
+            <p key={message} className="toast-line">
+              {message}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
       <section className="panel board-panel">
         <div className="panel-header">
           <div>
@@ -205,34 +247,60 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
           </div>
         </section>
 
-        <section className="round-preview">
-          <p className="panel-eyebrow">Preview</p>
-          <h2 className="round-title">현재 입력 미리보기</h2>
-
-          <div className="preview-grid">
-            <div className="preview-card">
-              <h3 className="block-title">순위</h3>
-              <ul className="preview-list">
-                <li>1등: {rankingNames[0]}</li>
-                <li>2등: {rankingNames[1]}</li>
-                <li>3등: {rankingNames[2]}</li>
-                <li>4등: {rankingNames[3]}</li>
-              </ul>
+        <section className="round-result-section">
+          <div className="section-heading">
+            <div>
+              <p className="panel-eyebrow">Calculation</p>
+              <h2 className="round-title">라운드 계산 결과</h2>
             </div>
-
-            <div className="preview-card">
-              <h3 className="block-title">플레이어별 점수와 선언</h3>
-              <ul className="preview-list">
-                {gameConfig.players.map((player, playerIndex) => (
-                  <li key={player.id}>
-                    {player.name}: {roundForm.points[playerIndex]}점 /{" "}
-                    {tichuOptions.find((option) => option.value === roundForm.tichu[playerIndex])
-                      ?.label ?? "없음"}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <button type="button" className="primary-button" onClick={handleCalculateRound}>
+              라운드 계산
+            </button>
           </div>
+
+          {calculationResult ? (
+            <div className="result-stack">
+              <div className="result-grid">
+                <div className="result-card">
+                  <h3 className="block-title">팀별 점수</h3>
+                  <ul className="preview-list">
+                    {calculationResult.teamScores.map((teamScore) => (
+                      <li key={teamScore.teamId}>
+                        {teamScore.teamName}: 기본 {teamScore.basePoints}점 / 티츄{" "}
+                        {teamScore.tichuPoints}점 / 합계 {teamScore.totalPoints}점
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="result-card">
+                  <h3 className="block-title">플레이어별 반영 결과</h3>
+                  <ul className="preview-list">
+                    {calculationResult.playerResults.map((playerResult) => (
+                      <li key={playerResult.playerId}>
+                        {playerResult.playerName}: 순위 {playerResult.rank ?? "-"} / 기본{" "}
+                        {playerResult.basePoints}점 / 티츄 {playerResult.tichuDelta}점 / 합계{" "}
+                        {playerResult.totalPoints}점
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="result-card">
+                <h3 className="block-title">입력 점수 합계</h3>
+                <p className="result-summary">
+                  현재 플레이어별 획득 점수 총합은 {calculationResult.totalEnteredPoints}점입니다.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="result-card">
+              <p className="result-summary">
+                `라운드 계산` 버튼을 누르면 팀별 점수와 플레이어별 반영 결과가 여기에 표시됩니다.
+              </p>
+            </div>
+          )}
         </section>
 
         <div className="button-row">

@@ -59,6 +59,41 @@
   padding: 2rem;
 }
 
+.toast-message {
+  position: fixed;
+  top: 1.5rem;
+  left: 50%;
+  z-index: 20;
+  min-width: 16rem;
+  max-width: min(90vw, 28rem);
+  padding: 0.95rem 1.15rem;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  transform: translateX(-50%);
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.toast-success {
+  border: 1px solid rgba(88, 164, 118, 0.28);
+  background: rgba(17, 46, 28, 0.92);
+  color: #d9f3e2;
+}
+
+.toast-error {
+  border: 1px solid rgba(207, 93, 93, 0.24);
+  background: rgba(45, 18, 18, 0.92);
+  color: #ffd8d8;
+}
+
+.toast-line {
+  margin: 0;
+}
+
+.toast-line + .toast-line {
+  margin-top: 0.35rem;
+}
+
 .panel {
   width: min(100%, 70rem);
   padding: 2rem;
@@ -100,7 +135,7 @@
 
 .setup-form,
 .round-form-section,
-.round-preview {
+.round-result-section {
   display: grid;
   gap: 1.5rem;
   margin-top: 2rem;
@@ -109,7 +144,7 @@
 .setup-grid,
 .board-grid,
 .round-grid,
-.preview-grid,
+.result-grid,
 .field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -151,7 +186,7 @@
 .team-block,
 .team-card,
 .round-block,
-.preview-card {
+.result-card {
   padding: 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 22px;
@@ -454,6 +489,17 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.result-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.result-summary {
+  margin: 0;
+  color: #c9cfd7;
+  line-height: 1.7;
+}
+
 @media (max-width: 768px) {
   .screen {
     padding: 1rem;
@@ -472,7 +518,7 @@
   .setup-grid,
   .board-grid,
   .round-grid,
-  .preview-grid,
+  .result-grid,
   .field-grid,
   .compact-grid {
     grid-template-columns: 1fr;
