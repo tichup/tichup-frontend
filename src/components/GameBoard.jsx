@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import "../App.css";
 import { calculateRoundScore } from "../calculateRoundScore";
+import StatsPanel from "./StatsPanel";
 
 const initialRoundForm = {
   rankings: ["", "", "", ""],
@@ -56,6 +57,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
   const [editingRoundId, setEditingRoundId] = useState(null);
   const [isWinnerCelebrationOpen, setIsWinnerCelebrationOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("board");
 
   const playerRanks = useMemo(
     () =>
@@ -264,8 +266,8 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
             <p className="panel-eyebrow">Game Board</p>
             <h1 className="panel-title">라운드를 기록하고 승패를 확인하세요</h1>
             <p className="panel-description">
-              저장된 라운드를 기준으로 누적 점수를 계산합니다. 목표 점수에 먼저 도달한 팀이
-              더 높은 점수라면 게임이 종료되고 더 이상 라운드를 추가할 수 없습니다.
+              저장된 라운드를 기준으로 누적 점수를 계산합니다. 통계 탭에서는 팀과 플레이어의
+              누적 흐름을 한눈에 볼 수 있습니다.
             </p>
           </div>
 
@@ -290,94 +292,121 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
           </section>
         ) : null}
 
-        <div className="board-grid">
-          {gameConfig.teams.map((team) => (
-            <article key={team.id} className="team-card">
-              <p className="team-label">Team</p>
-              <h2 className="team-name">{team.name}</h2>
-              <ul className="player-list">
-                {team.playerIds.map((playerId) => {
-                  const player = gameConfig.players.find((item) => item.id === playerId);
-                  return <li key={playerId}>{player?.name}</li>;
-                })}
-              </ul>
-              <div className="score-placeholder">
-                누적 점수 {teamTotals.find((item) => item.teamId === team.id)?.totalPoints ?? 0}점
-              </div>
-            </article>
-          ))}
+        <div className="board-tabs" role="tablist" aria-label="보드 탭">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "board"}
+            className={`board-tab-button ${activeTab === "board" ? "active" : ""}`}
+            onClick={() => setActiveTab("board")}
+          >
+            게임 보드
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "stats"}
+            className={`board-tab-button ${activeTab === "stats" ? "active" : ""}`}
+            onClick={() => setActiveTab("stats")}
+          >
+            통계
+          </button>
         </div>
 
-        <section className="round-history-section">
-          <div className="section-heading">
-            <div>
-              <p className="panel-eyebrow">History</p>
-              <h2 className="round-title">저장된 라운드</h2>
-            </div>
-          </div>
-
-          {savedRounds.length ? (
-            <div className="history-list">
-              {savedRounds.map((round) => (
-                <article key={round.id} className="history-card">
-                  <div className="history-header">
-                    <div>
-                      <h3 className="block-title">라운드 {round.id}</h3>
-                      <span className="history-meta">입력 점수 합계 {round.totalEnteredPoints}점</span>
-                    </div>
-                    <div className="history-action-row">
-                      <button
-                        type="button"
-                        className="secondary-button history-edit-button"
-                        onClick={() => openEditRoundModal(round)}
-                      >
-                        수정
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="result-grid">
-                    <div className="result-card">
-                      <h4 className="history-title">팀 점수</h4>
-                      <ul className="preview-list">
-                        {round.teamScores.map((teamScore) => (
-                          <li key={teamScore.teamId}>
-                            {teamScore.teamName}: {teamScore.totalPoints}점
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="result-card">
-                      <h4 className="history-title">플레이어 결과</h4>
-                      <ul className="preview-list">
-                        {round.playerResults.map((playerResult) => (
-                          <li key={playerResult.playerId}>
-                            {playerResult.playerName}: {playerResult.totalPoints}점
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+        {activeTab === "board" ? (
+          <>
+            <div className="board-grid">
+              {gameConfig.teams.map((team) => (
+                <article key={team.id} className="team-card">
+                  <p className="team-label">Team</p>
+                  <h2 className="team-name">{team.name}</h2>
+                  <ul className="player-list">
+                    {team.playerIds.map((playerId) => {
+                      const player = gameConfig.players.find((item) => item.id === playerId);
+                      return <li key={playerId}>{player?.name}</li>;
+                    })}
+                  </ul>
+                  <div className="score-placeholder">
+                    누적 점수 {teamTotals.find((item) => item.teamId === team.id)?.totalPoints ?? 0}점
                   </div>
                 </article>
               ))}
             </div>
-          ) : (
-            <div className="result-card">
-              <p className="result-summary">아직 저장된 라운드가 없습니다.</p>
-            </div>
-          )}
 
-          <button
-            type="button"
-            className="add-round-button"
-            onClick={openRoundModal}
-            aria-label="라운드 추가"
-            disabled={winnerSummary.hasWinner}
-          >
-            +
-          </button>
-        </section>
+            <section className="round-history-section">
+              <div className="section-heading">
+                <div>
+                  <p className="panel-eyebrow">History</p>
+                  <h2 className="round-title">저장된 라운드</h2>
+                </div>
+              </div>
+
+              {savedRounds.length ? (
+                <div className="history-list">
+                  {savedRounds.map((round) => (
+                    <article key={round.id} className="history-card">
+                      <div className="history-header">
+                        <div>
+                          <h3 className="block-title">라운드 {round.id}</h3>
+                          <span className="history-meta">입력 점수 합계 {round.totalEnteredPoints}점</span>
+                        </div>
+                        <div className="history-action-row">
+                          <button
+                            type="button"
+                            className="secondary-button history-edit-button"
+                            onClick={() => openEditRoundModal(round)}
+                          >
+                            수정
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="result-grid">
+                        <div className="result-card">
+                          <h4 className="history-title">팀 점수</h4>
+                          <ul className="preview-list">
+                            {round.teamScores.map((teamScore) => (
+                              <li key={teamScore.teamId}>
+                                {teamScore.teamName}: {teamScore.totalPoints}점
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div className="result-card">
+                          <h4 className="history-title">플레이어 결과</h4>
+                          <ul className="preview-list">
+                            {round.playerResults.map((playerResult) => (
+                              <li key={playerResult.playerId}>
+                                {playerResult.playerName}: {playerResult.totalPoints}점
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="result-card">
+                  <p className="result-summary">아직 저장된 라운드가 없습니다.</p>
+                </div>
+              )}
+
+              <button
+                type="button"
+                className="add-round-button"
+                onClick={openRoundModal}
+                aria-label="라운드 추가"
+                disabled={winnerSummary.hasWinner}
+              >
+                +
+              </button>
+            </section>
+          </>
+        ) : (
+          <StatsPanel gameConfig={gameConfig} savedRounds={savedRounds} teamTotals={teamTotals} />
+        )}
 
         <div className="button-row">
           <button type="button" className="secondary-button" onClick={onEditSetup}>
