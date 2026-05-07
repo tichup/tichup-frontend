@@ -173,7 +173,7 @@ function StatsBarList({ title, items, tone }) {
           ))}
         </div>
       ) : (
-        <p className="result-summary">아직 통계를 낼 라운드가 없습니다.</p>
+        <p className="result-summary">아직 통계를 볼 수 있는 라운드가 없습니다.</p>
       )}
     </section>
   );
@@ -181,7 +181,7 @@ function StatsBarList({ title, items, tone }) {
 
 function TichuTeamList({ items }) {
   return (
-    <section className="stats-card">
+    <section className="stats-card team-tichu-card">
       <h3 className="stats-card-title">팀별 티츄 결과</h3>
       {items.length ? (
         <div className="stats-detail-list">
@@ -192,8 +192,8 @@ function TichuTeamList({ items }) {
                 <span>총 {item.totalCalls}회</span>
               </div>
               <div className="stats-badge-row">
-                <span className="stats-badge success-badge">성공 {item.success}회</span>
-                <span className="stats-badge fail-badge">실패 {item.fail}회</span>
+                <span className="stats-badge success-badge">티츄 성공 {item.success}회</span>
+                <span className="stats-badge fail-badge">티츄 실패 {item.fail}회</span>
               </div>
             </article>
           ))}
@@ -207,24 +207,34 @@ function TichuTeamList({ items }) {
 
 function TichuPlayerList({ items }) {
   return (
-    <section className="stats-card">
+    <section className="stats-card player-tichu-card">
       <h3 className="stats-card-title">플레이어별 티츄 결과</h3>
       {items.length ? (
-        <div className="stats-detail-list">
-          {items.map((item) => (
-            <article key={item.playerId} className="stats-detail-item">
-              <div className="stats-detail-header">
-                <strong>{item.playerName}</strong>
-                <span>총 {item.totalCalls}회</span>
-              </div>
-              <div className="stats-badge-row">
-                <span className="stats-badge success-badge">라지 성공 {item.largeSuccess}회</span>
-                <span className="stats-badge fail-badge">라지 실패 {item.largeFail}회</span>
-                <span className="stats-badge success-badge">스몰 성공 {item.smallSuccess}회</span>
-                <span className="stats-badge fail-badge">스몰 실패 {item.smallFail}회</span>
-              </div>
-            </article>
-          ))}
+        <div className="stats-table-wrapper">
+          <table className="stats-table">
+            <thead>
+              <tr>
+                <th>플레이어</th>
+                <th>총</th>
+                <th>라지 티츄 성공</th>
+                <th>라지 티츄 실패</th>
+                <th>스몰 티츄 성공</th>
+                <th>스몰 티츄 실패</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.playerId}>
+                  <th scope="row">{item.playerName}</th>
+                  <td>{item.totalCalls}회</td>
+                  <td className="table-success">{item.largeSuccess}회</td>
+                  <td className="table-fail">{item.largeFail}회</td>
+                  <td className="table-success">{item.smallSuccess}회</td>
+                  <td className="table-fail">{item.smallFail}회</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : (
         <p className="result-summary">아직 티츄 선언 기록이 없습니다.</p>
@@ -244,7 +254,7 @@ function CumulativeLineChart({ flowData }) {
     return (
       <section className="stats-card stats-card-wide">
         <h3 className="stats-card-title">라운드별 누적 점수 흐름</h3>
-        <p className="result-summary">아직 흐름을 볼 라운드가 없습니다.</p>
+        <p className="result-summary">아직 흐름을 볼 수 있는 라운드가 없습니다.</p>
       </section>
     );
   }

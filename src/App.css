@@ -25,6 +25,43 @@
   font-size: 1rem;
 }
 
+/* Desktop scrollbar */
+@media (min-width: 769px) {
+  * {
+    scrollbar-color: rgba(126, 137, 150, 0.72) rgba(255, 255, 255, 0.08);
+    scrollbar-width: thin;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border: 2px solid rgba(27, 31, 37, 0.95);
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(134, 144, 156, 0.92), rgba(94, 104, 116, 0.84));
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(156, 166, 178, 0.96), rgba(112, 123, 136, 0.9));
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
 /* Layout */
 .screen {
   min-height: 100vh;
@@ -206,6 +243,7 @@
   display: flex;
   gap: 0.75rem;
   margin-top: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .board-tab-button {
@@ -265,6 +303,11 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.03);
+}
+
+.team-block {
+  display: grid;
+  gap: 0.9rem;
 }
 
 .history-card {
@@ -367,9 +410,28 @@
 .player-list,
 .preview-list {
   margin: 0;
-  padding-left: 1.1rem;
   color: #c9cfd7;
   line-height: 1.8;
+}
+
+.player-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.35rem;
+  padding: 0;
+  list-style: none;
+}
+
+.player-list li {
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(217, 175, 86, 0.18);
+  border-radius: 999px;
+  background: rgba(217, 175, 86, 0.08);
+  color: #f3dfaa;
+  font-size: 0.92rem;
+  line-height: 1.2;
 }
 
 .score-placeholder,
@@ -383,8 +445,22 @@
   margin-top: 1rem;
 }
 
+.score-placeholder strong {
+  color: #f2d78f;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
 .history-meta {
   font-size: 0.92rem;
+}
+
+.history-header .block-title {
+  margin-bottom: 0.2rem;
+}
+
+.history-header {
+  margin-bottom: 1rem;
 }
 
 .result-summary {
@@ -442,6 +518,14 @@
 .stats-detail-list {
   display: grid;
   gap: 1rem;
+}
+
+.player-input-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.team-tichu-card .stats-detail-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .player-input-header,
@@ -563,7 +647,7 @@
 
 .tichu-toggle-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.55rem;
 }
 
@@ -673,12 +757,24 @@
   justify-content: flex-end;
 }
 
+@media (min-width: 769px) {
+  .stats-section + .button-row {
+    margin-top: 1rem;
+  }
+}
+
 .history-edit-button {
   flex-shrink: 0;
+  padding: 0.65rem 0.9rem;
+  border-color: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.05);
+  color: #c9cfd7;
+  font-size: 0.9rem;
 }
 
 .add-round-button {
   width: 100%;
+  margin-bottom: 1rem;
   border: 1px dashed rgba(217, 175, 86, 0.4);
   border-radius: 22px;
   padding: 1rem 1.25rem;
@@ -905,6 +1001,52 @@
   background: linear-gradient(90deg, #f2d78f, #d9af56);
 }
 
+.stats-table-wrapper {
+  overflow-x: auto;
+  margin: 0 -0.2rem -0.2rem;
+  padding: 0 0.2rem 0.2rem;
+}
+
+.stats-table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  color: #d8dce2;
+  font-size: 0.9rem;
+}
+
+.stats-table th,
+.stats-table td {
+  padding: 0.8rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stats-table thead th {
+  color: #9ea7b3;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stats-table tbody th {
+  color: #f4f7fb;
+  text-align: left;
+}
+
+.stats-table tbody tr:last-child th,
+.stats-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-success {
+  color: #9be0b6;
+}
+
+.table-fail {
+  color: #ffb9b9;
+}
+
 .stats-badge-row {
   display: flex;
   flex-wrap: wrap;
@@ -1043,8 +1185,6 @@
     align-items: stretch;
   }
 
-  .setup-grid,
-  .board-grid,
   .round-grid,
   .result-grid,
   .field-grid,
@@ -1052,6 +1192,51 @@
   .stats-summary-grid,
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .stats-grid > *,
+  .stats-card,
+  .stats-detail-item {
+    min-width: 0;
+  }
+
+  .setup-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stats-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .stats-summary-label {
+    font-size: 0.76rem;
+  }
+
+  .stats-summary-card {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+  }
+
+  .stats-summary-value {
+    font-size: 1.05rem;
+  }
+
+  .stats-summary-meta {
+    font-size: 0.74rem;
+  }
+
+  .stats-table {
+    min-width: 28rem;
+    font-size: 0.82rem;
+  }
+
+  .stats-table th,
+  .stats-table td {
+    padding: 0.7rem 0.55rem;
+  }
+
+  .board-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .target-chip {
@@ -1064,10 +1249,21 @@
     flex-wrap: wrap;
   }
 
+  .player-input-list {
+    grid-template-columns: 1fr;
+  }
+
+  .player-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+  }
+
   .board-tabs {
     gap: 0.5rem;
     flex-wrap: nowrap;
     overflow-x: auto;
+    padding-top: 0.15rem;
     padding-bottom: 0.2rem;
   }
 
@@ -1079,6 +1275,10 @@
 
   .button-row {
     flex-direction: row;
+  }
+
+  .stats-section + .button-row {
+    margin-top: 1rem;
   }
 
   .button-row .primary-button,
@@ -1109,6 +1309,12 @@
     height: min(92vh, 52rem);
     padding: 1rem 1rem 0;
     border-radius: 24px 24px 0 0;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .modal-panel::-webkit-scrollbar {
+    display: none;
   }
 
   .modal-panel .section-heading {
@@ -1131,6 +1337,15 @@
     flex: 0 0 auto;
     padding: 0.75rem 0.95rem;
     white-space: nowrap;
+  }
+
+  .history-header {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .history-action-row {
+    margin-left: auto;
   }
 
   .modal-section {
@@ -1180,8 +1395,13 @@
     width: 100%;
   }
 
+  .add-round-button {
+    min-height: 3.45rem;
+    font-size: 1.5rem;
+  }
+
   .line-chart {
-    min-width: 30rem;
+    min-width: 0;
   }
 
   .celebration-panel {

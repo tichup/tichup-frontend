@@ -304,6 +304,24 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
     setIsWinnerCelebrationOpen(false);
   }, [winnerSummary.hasWinner]);
 
+  useEffect(() => {
+    if (!isRoundModalOpen) {
+      return undefined;
+    }
+
+    const { body } = document;
+    const previousOverflow = body.style.overflow;
+    const previousTouchAction = body.style.touchAction;
+
+    body.style.overflow = "hidden";
+    body.style.touchAction = "none";
+
+    return () => {
+      body.style.overflow = previousOverflow;
+      body.style.touchAction = previousTouchAction;
+    };
+  }, [isRoundModalOpen]);
+
   return (
     <main className="screen">
       {toastState.messages.length ? (
@@ -383,7 +401,8 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                     })}
                   </ul>
                   <div className="score-placeholder">
-                    누적 점수 {teamTotals.find((item) => item.teamId === team.id)?.totalPoints ?? 0}점
+                    누적 점수{" "}
+                    <strong>{teamTotals.find((item) => item.teamId === team.id)?.totalPoints ?? 0}점</strong>
                   </div>
                 </article>
               ))}

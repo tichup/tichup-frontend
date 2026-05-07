@@ -4,8 +4,8 @@ import "../App.css";
 function GameSetup({ initialConfig, onBack, onStartGame }) {
   const [form, setForm] = useState(() => ({
     targetScore: initialConfig.targetScore,
-    teamNames: initialConfig.teams.map((team) => team.name),
-    playerNames: initialConfig.players.map((player) => player.name),
+    teamNames: ["", ""],
+    playerNames: ["", "", "", ""],
   }));
 
   function updateTeamName(teamIndex, value) {
@@ -75,25 +75,28 @@ function GameSetup({ initialConfig, onBack, onStartGame }) {
           <div className="setup-grid">
             <section className="team-block">
               <label className="field">
-                <span>팀 1 이름</span>
+                <span>Team 1</span>
                 <input
                   value={form.teamNames[0]}
+                  placeholder={initialConfig.teams[0].name}
                   onChange={(event) => updateTeamName(0, event.target.value)}
                 />
               </label>
 
               <label className="field">
-                <span>팀 1 플레이어 1</span>
+                <span>P1</span>
                 <input
                   value={form.playerNames[0]}
+                  placeholder={initialConfig.players[0].name}
                   onChange={(event) => updatePlayerName(0, event.target.value)}
                 />
               </label>
 
               <label className="field">
-                <span>팀 1 플레이어 2</span>
+                <span>P2</span>
                 <input
                   value={form.playerNames[1]}
+                  placeholder={initialConfig.players[1].name}
                   onChange={(event) => updatePlayerName(1, event.target.value)}
                 />
               </label>
@@ -101,25 +104,28 @@ function GameSetup({ initialConfig, onBack, onStartGame }) {
 
             <section className="team-block">
               <label className="field">
-                <span>팀 2 이름</span>
+                <span>Team 2</span>
                 <input
                   value={form.teamNames[1]}
+                  placeholder={initialConfig.teams[1].name}
                   onChange={(event) => updateTeamName(1, event.target.value)}
                 />
               </label>
 
               <label className="field">
-                <span>팀 2 플레이어 1</span>
+                <span>P3</span>
                 <input
                   value={form.playerNames[2]}
+                  placeholder={initialConfig.players[2].name}
                   onChange={(event) => updatePlayerName(2, event.target.value)}
                 />
               </label>
 
               <label className="field">
-                <span>팀 2 플레이어 2</span>
+                <span>P4</span>
                 <input
                   value={form.playerNames[3]}
+                  placeholder={initialConfig.players[3].name}
                   onChange={(event) => updatePlayerName(3, event.target.value)}
                 />
               </label>
