@@ -251,8 +251,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
       return [...current, nextRound];
     });
 
-    setRoundForm(initialRoundForm);
-    setEditingRoundId(null);
+    resetRoundForm();
     setIsRoundModalOpen(false);
     setToastState({
       type: "success",
@@ -630,8 +629,8 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
             <p className="celebration-eyebrow">Victory</p>
             <h2 className="celebration-title">{winnerSummary.winnerTeam.teamName} 우승</h2>
             <p className="celebration-description">
-              목표 점수 {gameConfig.targetScore}점을 넘기며 최종 {winnerSummary.winnerTeam.totalPoints}
-              점을 기록했습니다.
+              목표 점수 {gameConfig.targetScore}점을 넘기며 최종 {winnerSummary.winnerTeam.totalPoints}점을
+              기록했습니다.
             </p>
 
             <button

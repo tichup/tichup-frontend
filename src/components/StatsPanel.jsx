@@ -252,7 +252,9 @@ function CumulativeLineChart({ flowData }) {
   const teamSeries = flowData[0].teamPoints.map((teamPoint) => ({
     teamId: teamPoint.teamId,
     teamName: teamPoint.teamName,
-    values: flowData.map((round) => round.teamPoints.find((item) => item.teamId === teamPoint.teamId)?.totalPoints ?? 0),
+    values: flowData.map(
+      (round) => round.teamPoints.find((item) => item.teamId === teamPoint.teamId)?.totalPoints ?? 0,
+    ),
   }));
 
   const allValues = teamSeries.flatMap((series) => series.values);
@@ -263,7 +265,10 @@ function CumulativeLineChart({ flowData }) {
   const innerHeight = chartHeight - paddingTop - paddingBottom;
 
   const xForIndex = (index) =>
-    paddingX + (teamSeries[0].values.length === 1 ? innerWidth / 2 : (innerWidth / (teamSeries[0].values.length - 1)) * index);
+    paddingX +
+    (teamSeries[0].values.length === 1
+      ? innerWidth / 2
+      : (innerWidth / (teamSeries[0].values.length - 1)) * index);
 
   const yForValue = (value) => paddingTop + ((maxValue - value) / range) * innerHeight;
   const zeroLineY = yForValue(0);
@@ -282,7 +287,12 @@ function CumulativeLineChart({ flowData }) {
       </div>
 
       <div className="line-chart-wrapper">
-        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="line-chart" role="img" aria-label="라운드별 누적 점수 그래프">
+        <svg
+          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+          className="line-chart"
+          role="img"
+          aria-label="라운드별 누적 점수 그래프"
+        >
           <line
             x1={paddingX}
             y1={zeroLineY}

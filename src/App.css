@@ -196,6 +196,7 @@
 
 .round-form-status {
   margin-right: auto;
+  min-width: 0;
 }
 
 .round-status-badge {
@@ -221,6 +222,8 @@
 
 .modal-footer {
   display: flex;
+  align-items: center;
+  gap: 1rem;
   justify-content: flex-end;
   margin-top: 1.5rem;
 }
@@ -913,7 +916,7 @@
 
 .line-chart {
   width: 100%;
-  min-width: 40rem;
+  min-width: 34rem;
   height: auto;
 }
 
@@ -1013,11 +1016,13 @@
 
 @media (max-width: 768px) {
   .screen {
-    padding: 1rem;
+    align-items: stretch;
+    padding: 0.75rem;
   }
 
   .panel {
-    padding: 1.25rem;
+    padding: 1rem;
+    border-radius: 22px;
   }
 
   .panel-header,
@@ -1026,8 +1031,20 @@
   .action-row,
   .history-header,
   .stats-bar-header,
-  .stats-detail-header {
+  .stats-detail-header,
+  .modal-footer {
     flex-direction: column;
+  }
+
+  .panel-header,
+  .section-heading,
+  .button-row,
+  .action-row,
+  .history-header,
+  .stats-bar-header,
+  .stats-detail-header,
+  .modal-footer {
+    align-items: stretch;
   }
 
   .setup-grid,
@@ -1051,7 +1068,93 @@
   }
 
   .board-tabs {
-    flex-wrap: wrap;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+  }
+
+  .board-tab-button {
+    flex: 1 0 auto;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .team-block,
+  .team-card,
+  .round-block,
+  .result-card,
+  .stats-summary-card,
+  .stats-card,
+  .player-input-card,
+  .history-card,
+  .stats-detail-item {
+    padding: 1rem;
+    border-radius: 18px;
+  }
+
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-panel {
+    width: 100%;
+    max-height: min(92vh, 52rem);
+    padding: 1rem 1rem 0;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .modal-section {
+    margin-bottom: 1rem;
+  }
+
+  .round-title {
+    font-size: 1.2rem;
+  }
+
+  .tichu-toggle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rank-toggle-button,
+  .tichu-toggle-button {
+    min-height: 2.85rem;
+  }
+
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0 -1rem 0;
+    padding: 0.9rem 1rem calc(0.9rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(27, 31, 37, 0.96);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0;
+    backdrop-filter: blur(12px);
+  }
+
+  .round-form-status {
+    margin-right: 0;
+  }
+
+  .round-progress-value {
+    font-size: 1rem;
+  }
+
+  .round-status-badge {
+    margin-top: 0.45rem;
+    margin-left: 0;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+  }
+
+  .line-chart {
+    min-width: 30rem;
   }
 
   .celebration-panel {
