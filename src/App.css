@@ -135,7 +135,8 @@
 
 .setup-form,
 .round-form-section,
-.round-result-section {
+.round-result-section,
+.round-history-section {
   display: grid;
   gap: 1.5rem;
   margin-top: 2rem;
@@ -203,6 +204,11 @@
   gap: 0.75rem;
 }
 
+.action-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
 .primary-button,
 .secondary-button {
   border: 0;
@@ -223,6 +229,11 @@
   background: rgba(255, 255, 255, 0.08);
   color: #f4f7fb;
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .secondary-button:hover,
@@ -494,6 +505,37 @@
   gap: 1rem;
 }
 
+.history-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.history-card {
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.history-meta {
+  color: #9ea7b3;
+  font-size: 0.92rem;
+}
+
+.history-title {
+  margin: 0 0 0.85rem;
+  color: #f4f7fb;
+  font-size: 1rem;
+}
+
 .result-summary {
   margin: 0;
   color: #c9cfd7;
@@ -511,7 +553,9 @@
 
   .panel-header,
   .section-heading,
-  .button-row {
+  .button-row,
+  .action-row,
+  .history-header {
     flex-direction: column;
   }
 

@@ -25,6 +25,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   const [roundForm, setRoundForm] = useState(initialRoundForm);
   const [calculationResult, setCalculationResult] = useState(null);
   const [toastState, setToastState] = useState({ type: "", messages: [] });
+  const [savedRounds, setSavedRounds] = useState([]);
 
   const playerRanks = useMemo(
     () =>
@@ -33,6 +34,22 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
         return rankIndex >= 0 ? String(rankIndex + 1) : "";
       }),
     [gameConfig.players, roundForm.rankings],
+  );
+
+  const teamTotals = useMemo(
+    () =>
+      gameConfig.teams.map((team) => {
+        const totalPoints = savedRounds.reduce((sum, round) => {
+          const teamScore = round.teamScores.find((item) => item.teamId === team.id);
+          return sum + (teamScore?.totalPoints ?? 0);
+        }, 0);
+
+        return {
+          teamId: team.id,
+          totalPoints,
+        };
+      }),
+    [gameConfig.teams, savedRounds],
   );
 
   function updatePoint(playerIndex, value) {
@@ -95,6 +112,35 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
     }
   }
 
+  function handleSaveRound() {
+    if (!calculationResult?.isValid) {
+      setToastState({
+        type: "error",
+        messages: ["저장하기 전에 유효한 라운드 계산이 필요합니다."],
+      });
+      return;
+    }
+
+    setSavedRounds((current) => [
+      ...current,
+      {
+        id: current.length + 1,
+        rankings: [...roundForm.rankings],
+        points: [...roundForm.points],
+        tichu: [...roundForm.tichu],
+        totalEnteredPoints: calculationResult.totalEnteredPoints,
+        playerResults: calculationResult.playerResults,
+        teamScores: calculationResult.teamScores,
+      },
+    ]);
+
+    resetRoundForm();
+    setToastState({
+      type: "success",
+      messages: ["라운드를 저장했습니다."],
+    });
+  }
+
   useEffect(() => {
     if (toastState.messages.length === 0) {
       return undefined;
@@ -144,7 +190,9 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                   return <li key={playerId}>{player?.name}</li>;
                 })}
               </ul>
-              <div className="score-placeholder">누적 점수 0점</div>
+              <div className="score-placeholder">
+                누적 점수 {teamTotals.find((item) => item.teamId === team.id)?.totalPoints ?? 0}점
+              </div>
             </article>
           ))}
         </div>
@@ -253,9 +301,19 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
               <p className="panel-eyebrow">Calculation</p>
               <h2 className="round-title">라운드 계산 결과</h2>
             </div>
-            <button type="button" className="primary-button" onClick={handleCalculateRound}>
-              라운드 계산
-            </button>
+            <div className="action-row">
+              <button type="button" className="primary-button" onClick={handleCalculateRound}>
+                라운드 계산
+              </button>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={handleSaveRound}
+                disabled={!calculationResult?.isValid}
+              >
+                라운드 저장
+              </button>
+            </div>
           </div>
 
           {calculationResult ? (
@@ -299,6 +357,56 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
               <p className="result-summary">
                 `라운드 계산` 버튼을 누르면 팀별 점수와 플레이어별 반영 결과가 여기에 표시됩니다.
               </p>
+            </div>
+          )}
+        </section>
+
+        <section className="round-history-section">
+          <div className="section-heading">
+            <div>
+              <p className="panel-eyebrow">History</p>
+              <h2 className="round-title">저장된 라운드</h2>
+            </div>
+          </div>
+
+          {savedRounds.length ? (
+            <div className="history-list">
+              {savedRounds.map((round) => (
+                <article key={round.id} className="history-card">
+                  <div className="history-header">
+                    <h3 className="block-title">라운드 {round.id}</h3>
+                    <span className="history-meta">입력 점수 합계 {round.totalEnteredPoints}점</span>
+                  </div>
+
+                  <div className="result-grid">
+                    <div className="result-card">
+                      <h4 className="history-title">팀 점수</h4>
+                      <ul className="preview-list">
+                        {round.teamScores.map((teamScore) => (
+                          <li key={teamScore.teamId}>
+                            {teamScore.teamName}: {teamScore.totalPoints}점
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="result-card">
+                      <h4 className="history-title">플레이어 결과</h4>
+                      <ul className="preview-list">
+                        {round.playerResults.map((playerResult) => (
+                          <li key={playerResult.playerId}>
+                            {playerResult.playerName}: {playerResult.totalPoints}점
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="result-card">
+              <p className="result-summary">아직 저장된 라운드가 없습니다.</p>
             </div>
           )}
         </section>
