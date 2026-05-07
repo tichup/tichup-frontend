@@ -505,7 +505,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                     <article key={player.id} className="player-input-card">
                       <div className="player-input-header">
                         <strong>{player.name}</strong>
-                        <span>{gameConfig.teams[player.teamId].name}</span>
+                        <span className="player-team-inline">{gameConfig.teams[player.teamId].name}</span>
                       </div>
 
                       <div className="field-grid compact-grid">
@@ -592,12 +592,12 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                 <span className="round-progress-label">
                   {isEditingRound ? `라운드 ${editingRoundId} 수정 중` : "새 라운드 작성 중"}
                 </span>
-                <strong className="round-progress-value">
-                  {totalEnteredPoints} / 100점
+                <div className="round-progress-row">
+                  <strong className="round-progress-value">{totalEnteredPoints} / 100점</strong>
                   <span className={`round-status-badge ${hasAllRanksSelected ? "is-ready" : "is-pending"}`}>
                     {hasAllRanksSelected ? "순위 완료" : "순위 필요"}
                   </span>
-                </strong>
+                </div>
               </div>
               <button
                 type="button"
