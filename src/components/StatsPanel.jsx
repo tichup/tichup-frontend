@@ -120,6 +120,33 @@ function getBestRound(savedRounds) {
   return bestRound;
 }
 
+function getCumulativeFlowData(savedRounds, teams) {
+  const runningTotals = new Map(teams.map((team) => [team.id, 0]));
+
+  return savedRounds.map((round) => {
+    const teamPoints = teams.map((team) => {
+      const teamScore = round.teamScores.find((item) => item.teamId === team.id);
+      const nextTotal = (runningTotals.get(team.id) ?? 0) + (teamScore?.totalPoints ?? 0);
+      runningTotals.set(team.id, nextTotal);
+
+      return {
+        teamId: team.id,
+        teamName: team.name,
+        totalPoints: nextTotal,
+      };
+    });
+
+    return {
+      roundId: round.id,
+      teamPoints,
+    };
+  });
+}
+
+function buildLinePath(points) {
+  return points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+}
+
 function StatsBarList({ title, items, tone }) {
   const maxAbsValue = getMaxAbsValue(items);
 
@@ -206,15 +233,126 @@ function TichuPlayerList({ items }) {
   );
 }
 
+function CumulativeLineChart({ flowData }) {
+  const chartWidth = 720;
+  const chartHeight = 280;
+  const paddingX = 36;
+  const paddingTop = 24;
+  const paddingBottom = 36;
+
+  if (!flowData.length) {
+    return (
+      <section className="stats-card stats-card-wide">
+        <h3 className="stats-card-title">라운드별 누적 점수 흐름</h3>
+        <p className="result-summary">아직 흐름을 볼 라운드가 없습니다.</p>
+      </section>
+    );
+  }
+
+  const teamSeries = flowData[0].teamPoints.map((teamPoint) => ({
+    teamId: teamPoint.teamId,
+    teamName: teamPoint.teamName,
+    values: flowData.map((round) => round.teamPoints.find((item) => item.teamId === teamPoint.teamId)?.totalPoints ?? 0),
+  }));
+
+  const allValues = teamSeries.flatMap((series) => series.values);
+  const maxValue = Math.max(...allValues, 0);
+  const minValue = Math.min(...allValues, 0);
+  const range = maxValue - minValue || 1;
+  const innerWidth = chartWidth - paddingX * 2;
+  const innerHeight = chartHeight - paddingTop - paddingBottom;
+
+  const xForIndex = (index) =>
+    paddingX + (teamSeries[0].values.length === 1 ? innerWidth / 2 : (innerWidth / (teamSeries[0].values.length - 1)) * index);
+
+  const yForValue = (value) => paddingTop + ((maxValue - value) / range) * innerHeight;
+  const zeroLineY = yForValue(0);
+
+  return (
+    <section className="stats-card stats-card-wide">
+      <h3 className="stats-card-title">라운드별 누적 점수 흐름</h3>
+
+      <div className="line-chart-legend">
+        {teamSeries.map((series, index) => (
+          <div key={series.teamId} className="line-chart-legend-item">
+            <span className={`line-chart-legend-dot ${index === 0 ? "team-tone" : "player-tone"}`} />
+            <span>{series.teamName}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="line-chart-wrapper">
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="line-chart" role="img" aria-label="라운드별 누적 점수 그래프">
+          <line
+            x1={paddingX}
+            y1={zeroLineY}
+            x2={chartWidth - paddingX}
+            y2={zeroLineY}
+            className="line-chart-zero"
+          />
+
+          {flowData.map((round, index) => (
+            <g key={round.roundId}>
+              <line
+                x1={xForIndex(index)}
+                y1={paddingTop}
+                x2={xForIndex(index)}
+                y2={chartHeight - paddingBottom}
+                className="line-chart-guide"
+              />
+              <text x={xForIndex(index)} y={chartHeight - 10} textAnchor="middle" className="line-chart-label">
+                R{round.roundId}
+              </text>
+            </g>
+          ))}
+
+          {teamSeries.map((series, index) => {
+            const points = series.values.map((value, pointIndex) => ({
+              x: xForIndex(pointIndex),
+              y: yForValue(value),
+              value,
+            }));
+
+            return (
+              <g key={series.teamId}>
+                <path
+                  d={buildLinePath(points)}
+                  className={`line-chart-path ${index === 0 ? "team-tone" : "player-tone"}`}
+                />
+
+                {points.map((point, pointIndex) => (
+                  <g key={`${series.teamId}-${pointIndex}`}>
+                    <circle
+                      cx={point.x}
+                      cy={point.y}
+                      r="5"
+                      className={`line-chart-point ${index === 0 ? "team-tone" : "player-tone"}`}
+                    />
+                    <text x={point.x} y={point.y - 10} textAnchor="middle" className="line-chart-value">
+                      {point.value}
+                    </text>
+                  </g>
+                ))}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </section>
+  );
+}
+
 function StatsPanel({ gameConfig, savedRounds, teamTotals }) {
   const playerTotals = getPlayerTotals(gameConfig.players, savedRounds).sort(
     (a, b) => b.totalPoints - a.totalPoints,
   );
   const playerTichuStats = getPlayerTichuStats(gameConfig.players, savedRounds).sort(
-    (a, b) => b.totalCalls - a.totalCalls || b.largeSuccess + b.smallSuccess - (a.largeSuccess + a.smallSuccess),
+    (a, b) =>
+      b.totalCalls - a.totalCalls || b.largeSuccess + b.smallSuccess - (a.largeSuccess + a.smallSuccess),
   );
   const teamTichuStats = getTeamTichuStats(gameConfig.teams, savedRounds);
   const bestRound = getBestRound(savedRounds);
+  const cumulativeFlowData = getCumulativeFlowData(savedRounds, gameConfig.teams);
 
   return (
     <section className="stats-section">
@@ -237,6 +375,8 @@ function StatsPanel({ gameConfig, savedRounds, teamTotals }) {
           {bestRound ? <span className="stats-summary-meta">라운드 {bestRound.roundId}</span> : null}
         </article>
       </div>
+
+      <CumulativeLineChart flowData={cumulativeFlowData} />
 
       <div className="stats-grid">
         <StatsBarList title="팀 누적 점수" items={teamTotals} tone="team-tone" />

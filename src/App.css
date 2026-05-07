@@ -203,6 +203,10 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.stats-card-wide {
+  grid-column: 1 / -1;
+}
+
 .field {
   display: grid;
   gap: 0.55rem;
@@ -828,6 +832,95 @@
 
 .stats-bar-fill.player-tone {
   background: linear-gradient(90deg, #f2d78f, #d9af56);
+}
+
+.line-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.line-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #d8dce2;
+  font-size: 0.92rem;
+}
+
+.line-chart-legend-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 999px;
+}
+
+.line-chart-legend-dot.team-tone {
+  background: #58a476;
+}
+
+.line-chart-legend-dot.player-tone {
+  background: #d9af56;
+}
+
+.line-chart-wrapper {
+  overflow-x: auto;
+}
+
+.line-chart {
+  width: 100%;
+  min-width: 40rem;
+  height: auto;
+}
+
+.line-chart-zero,
+.line-chart-guide {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1;
+}
+
+.line-chart-guide {
+  stroke-dasharray: 4 6;
+}
+
+.line-chart-label,
+.line-chart-value {
+  fill: #c9cfd7;
+  font-size: 12px;
+}
+
+.line-chart-value {
+  fill: #f4f7fb;
+}
+
+.line-chart-path {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.line-chart-path.team-tone {
+  stroke: #58a476;
+}
+
+.line-chart-path.player-tone {
+  stroke: #d9af56;
+}
+
+.line-chart-point {
+  stroke-width: 3;
+  fill: currentColor;
+}
+
+.line-chart-point.team-tone {
+  stroke: #58a476;
+  color: #58a476;
+}
+
+.line-chart-point.player-tone {
+  stroke: #d9af56;
+  color: #d9af56;
 }
 
 .stats-detail-list {
