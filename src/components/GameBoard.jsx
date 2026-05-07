@@ -3,6 +3,9 @@ import "../App.css";
 import { calculateRoundScore } from "../calculateRoundScore";
 import StatsPanel from "./StatsPanel";
 
+const ROUNDS_STORAGE_KEY = "tichup.rounds.v1";
+const ACTIVE_TAB_STORAGE_KEY = "tichup.active-tab.v1";
+
 const initialRoundForm = {
   rankings: ["", "", "", ""],
   points: ["0", "0", "0", "0"],
@@ -15,6 +18,33 @@ const tichuOptions = [
   { value: "small-success", label: "스몰 티츄 성공" },
   { value: "small-fail", label: "스몰 티츄 실패" },
 ];
+
+function getInitialSavedRounds() {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const stored = window.localStorage.getItem(ROUNDS_STORAGE_KEY);
+    const parsed = stored ? JSON.parse(stored) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function getInitialActiveTab() {
+  if (typeof window === "undefined") {
+    return "board";
+  }
+
+  try {
+    const stored = window.localStorage.getItem(ACTIVE_TAB_STORAGE_KEY);
+    return stored === "stats" ? "stats" : "board";
+  } catch {
+    return "board";
+  }
+}
 
 function getSliderFillPercent(value) {
   const min = -25;
@@ -53,11 +83,11 @@ function getWinnerSummary(teamTotals, targetScore) {
 function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   const [roundForm, setRoundForm] = useState(initialRoundForm);
   const [toastState, setToastState] = useState({ type: "", messages: [] });
-  const [savedRounds, setSavedRounds] = useState([]);
+  const [savedRounds, setSavedRounds] = useState(getInitialSavedRounds);
   const [isRoundModalOpen, setIsRoundModalOpen] = useState(false);
   const [editingRoundId, setEditingRoundId] = useState(null);
   const [isWinnerCelebrationOpen, setIsWinnerCelebrationOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("board");
+  const [activeTab, setActiveTab] = useState(getInitialActiveTab);
 
   const playerRanks = useMemo(
     () =>
@@ -226,6 +256,14 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
 
     resetRoundForm();
   }
+
+  useEffect(() => {
+    window.localStorage.setItem(ROUNDS_STORAGE_KEY, JSON.stringify(savedRounds));
+  }, [savedRounds]);
+
+  useEffect(() => {
+    window.localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, activeTab);
+  }, [activeTab]);
 
   useEffect(() => {
     if (toastState.messages.length === 0) {

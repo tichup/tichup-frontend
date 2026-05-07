@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Landing from "./components/Landing";
 import GameSetup from "./components/GameSetup";
 import GameBoard from "./components/GameBoard";
+
+const APP_STORAGE_KEY = "tichup.app-state.v1";
 
 const initialGameConfig = {
   targetScore: 1000,
@@ -17,18 +19,70 @@ const initialGameConfig = {
   ],
 };
 
-function App() {
-  const [screen, setScreen] = useState("landing");
-  const [gameConfig, setGameConfig] = useState(initialGameConfig);
+function getInitialAppState() {
+  if (typeof window === "undefined") {
+    return {
+      screen: "landing",
+      gameConfig: initialGameConfig,
+    };
+  }
 
-  if (screen === "landing") {
+  try {
+    const stored = window.localStorage.getItem(APP_STORAGE_KEY);
+    if (!stored) {
+      return {
+        screen: "landing",
+        gameConfig: initialGameConfig,
+      };
+    }
+
+    const parsed = JSON.parse(stored);
+    const nextScreen =
+      parsed?.screen === "landing" || parsed?.screen === "setup" || parsed?.screen === "game"
+        ? parsed.screen
+        : "landing";
+
+    return {
+      screen: nextScreen,
+      gameConfig: parsed?.gameConfig ?? initialGameConfig,
+    };
+  } catch {
+    return {
+      screen: "landing",
+      gameConfig: initialGameConfig,
+    };
+  }
+}
+
+function App() {
+  const [appState, setAppState] = useState(getInitialAppState);
+
+  useEffect(() => {
+    window.localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(appState));
+  }, [appState]);
+
+  function setScreen(nextScreen) {
+    setAppState((current) => ({
+      ...current,
+      screen: nextScreen,
+    }));
+  }
+
+  function setGameConfig(nextConfig) {
+    setAppState((current) => ({
+      ...current,
+      gameConfig: nextConfig,
+    }));
+  }
+
+  if (appState.screen === "landing") {
     return <Landing onStart={() => setScreen("setup")} />;
   }
 
-  if (screen === "setup") {
+  if (appState.screen === "setup") {
     return (
       <GameSetup
-        initialConfig={gameConfig}
+        initialConfig={appState.gameConfig}
         onBack={() => setScreen("landing")}
         onStartGame={(nextConfig) => {
           setGameConfig(nextConfig);
@@ -40,11 +94,17 @@ function App() {
 
   return (
     <GameBoard
-      gameConfig={gameConfig}
+      gameConfig={appState.gameConfig}
       onEditSetup={() => setScreen("setup")}
       onResetGame={() => {
-        setGameConfig(initialGameConfig);
-        setScreen("landing");
+        window.localStorage.removeItem(APP_STORAGE_KEY);
+        window.localStorage.removeItem("tichup.rounds.v1");
+        window.localStorage.removeItem("tichup.active-tab.v1");
+
+        setAppState({
+          screen: "landing",
+          gameConfig: initialGameConfig,
+        });
       }}
     />
   );
