@@ -20,6 +20,87 @@ function getPlayerTotals(players, savedRounds) {
   });
 }
 
+function getPlayerTichuStats(players, savedRounds) {
+  return players.map((player) => {
+    const stats = savedRounds.reduce(
+      (accumulator, round) => {
+        const playerResult = round.playerResults.find((item) => item.playerId === player.id);
+        const tichu = playerResult?.tichu ?? "none";
+
+        if (tichu === "none") {
+          return accumulator;
+        }
+
+        accumulator.totalCalls += 1;
+
+        if (tichu === "large-success") {
+          accumulator.largeSuccess += 1;
+        } else if (tichu === "large-fail") {
+          accumulator.largeFail += 1;
+        } else if (tichu === "small-success") {
+          accumulator.smallSuccess += 1;
+        } else if (tichu === "small-fail") {
+          accumulator.smallFail += 1;
+        }
+
+        return accumulator;
+      },
+      {
+        largeSuccess: 0,
+        largeFail: 0,
+        smallSuccess: 0,
+        smallFail: 0,
+        totalCalls: 0,
+      },
+    );
+
+    return {
+      playerId: player.id,
+      playerName: player.name,
+      ...stats,
+    };
+  });
+}
+
+function getTeamTichuStats(teams, savedRounds) {
+  return teams.map((team) => {
+    const stats = savedRounds.reduce(
+      (accumulator, round) => {
+        const members = round.playerResults.filter((item) => item.teamId === team.id);
+
+        members.forEach((playerResult) => {
+          if (playerResult.tichu === "none") {
+            return;
+          }
+
+          accumulator.totalCalls += 1;
+
+          if (playerResult.tichu === "large-success" || playerResult.tichu === "small-success") {
+            accumulator.success += 1;
+          }
+
+          if (playerResult.tichu === "large-fail" || playerResult.tichu === "small-fail") {
+            accumulator.fail += 1;
+          }
+        });
+
+        return accumulator;
+      },
+      {
+        success: 0,
+        fail: 0,
+        totalCalls: 0,
+      },
+    );
+
+    return {
+      teamId: team.id,
+      teamName: team.name,
+      ...stats,
+    };
+  });
+}
+
 function getBestRound(savedRounds) {
   let bestRound = null;
 
@@ -71,10 +152,68 @@ function StatsBarList({ title, items, tone }) {
   );
 }
 
+function TichuTeamList({ items }) {
+  return (
+    <section className="stats-card">
+      <h3 className="stats-card-title">팀별 티츄 결과</h3>
+      {items.length ? (
+        <div className="stats-detail-list">
+          {items.map((item) => (
+            <article key={item.teamId} className="stats-detail-item">
+              <div className="stats-detail-header">
+                <strong>{item.teamName}</strong>
+                <span>총 {item.totalCalls}회</span>
+              </div>
+              <div className="stats-badge-row">
+                <span className="stats-badge success-badge">성공 {item.success}회</span>
+                <span className="stats-badge fail-badge">실패 {item.fail}회</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="result-summary">아직 티츄 선언 기록이 없습니다.</p>
+      )}
+    </section>
+  );
+}
+
+function TichuPlayerList({ items }) {
+  return (
+    <section className="stats-card">
+      <h3 className="stats-card-title">플레이어별 티츄 결과</h3>
+      {items.length ? (
+        <div className="stats-detail-list">
+          {items.map((item) => (
+            <article key={item.playerId} className="stats-detail-item">
+              <div className="stats-detail-header">
+                <strong>{item.playerName}</strong>
+                <span>총 {item.totalCalls}회</span>
+              </div>
+              <div className="stats-badge-row">
+                <span className="stats-badge success-badge">라지 성공 {item.largeSuccess}회</span>
+                <span className="stats-badge fail-badge">라지 실패 {item.largeFail}회</span>
+                <span className="stats-badge success-badge">스몰 성공 {item.smallSuccess}회</span>
+                <span className="stats-badge fail-badge">스몰 실패 {item.smallFail}회</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="result-summary">아직 티츄 선언 기록이 없습니다.</p>
+      )}
+    </section>
+  );
+}
+
 function StatsPanel({ gameConfig, savedRounds, teamTotals }) {
   const playerTotals = getPlayerTotals(gameConfig.players, savedRounds).sort(
     (a, b) => b.totalPoints - a.totalPoints,
   );
+  const playerTichuStats = getPlayerTichuStats(gameConfig.players, savedRounds).sort(
+    (a, b) => b.totalCalls - a.totalCalls || b.largeSuccess + b.smallSuccess - (a.largeSuccess + a.smallSuccess),
+  );
+  const teamTichuStats = getTeamTichuStats(gameConfig.teams, savedRounds);
   const bestRound = getBestRound(savedRounds);
 
   return (
@@ -95,15 +234,18 @@ function StatsPanel({ gameConfig, savedRounds, teamTotals }) {
           <strong className="stats-summary-value">
             {bestRound ? `${bestRound.teamName} ${bestRound.totalPoints}점` : "-"}
           </strong>
-          {bestRound ? (
-            <span className="stats-summary-meta">라운드 {bestRound.roundId}</span>
-          ) : null}
+          {bestRound ? <span className="stats-summary-meta">라운드 {bestRound.roundId}</span> : null}
         </article>
       </div>
 
       <div className="stats-grid">
         <StatsBarList title="팀 누적 점수" items={teamTotals} tone="team-tone" />
         <StatsBarList title="플레이어 누적 점수" items={playerTotals} tone="player-tone" />
+      </div>
+
+      <div className="stats-grid">
+        <TichuTeamList items={teamTichuStats} />
+        <TichuPlayerList items={playerTichuStats} />
       </div>
     </section>
   );

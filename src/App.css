@@ -830,6 +830,50 @@
   background: linear-gradient(90deg, #f2d78f, #d9af56);
 }
 
+.stats-detail-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.stats-detail-item {
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.stats-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #d8dce2;
+}
+
+.stats-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.stats-badge {
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.success-badge {
+  background: rgba(88, 164, 118, 0.18);
+  color: #cdebd8;
+}
+
+.fail-badge {
+  background: rgba(207, 93, 93, 0.16);
+  color: #ffd8d8;
+}
+
 @media (max-width: 768px) {
   .screen {
     padding: 1rem;
@@ -844,7 +888,8 @@
   .button-row,
   .action-row,
   .history-header,
-  .stats-bar-header {
+  .stats-bar-header,
+  .stats-detail-header {
     flex-direction: column;
   }
 
