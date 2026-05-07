@@ -517,6 +517,7 @@
 
 .rank-field {
   gap: 0.35rem;
+  align-self: start;
 }
 
 .field input,
@@ -671,6 +672,7 @@
 
 .compact-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 2rem;
 }
 
 .rank-toggle-button,
