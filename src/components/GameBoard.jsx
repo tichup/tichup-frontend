@@ -401,7 +401,6 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                     })}
                   </ul>
                   <div className="score-placeholder">
-                    누적 점수{" "}
                     <strong>{teamTotals.find((item) => item.teamId === team.id)?.totalPoints ?? 0}점</strong>
                   </div>
                 </article>
@@ -423,7 +422,6 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                       <div className="history-header">
                         <div>
                           <h3 className="block-title">라운드 {round.id}</h3>
-                          <span className="history-meta">입력 점수 합계 {round.totalEnteredPoints}점</span>
                         </div>
                         <div className="history-action-row">
                           <button
@@ -468,15 +466,16 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                 </div>
               )}
 
-              <button
-                type="button"
-                className="add-round-button"
-                onClick={openRoundModal}
-                aria-label="라운드 추가"
-                disabled={winnerSummary.hasWinner}
-              >
-                +
-              </button>
+              {!winnerSummary.hasWinner ? (
+                <button
+                  type="button"
+                  className="add-round-button"
+                  onClick={openRoundModal}
+                  aria-label="라운드 추가"
+                >
+                  +
+                </button>
+              ) : null}
             </section>
           </>
         ) : (

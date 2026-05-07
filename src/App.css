@@ -238,6 +238,10 @@
   color: #ffcdc8;
 }
 
+.button-row .secondary-button {
+  font-weight: 500;
+}
+
 /* Tabs */
 .board-tabs {
   display: flex;
@@ -412,6 +416,11 @@
   margin: 0;
   color: #c9cfd7;
   line-height: 1.8;
+}
+
+.preview-list {
+  padding: 0;
+  list-style: none;
 }
 
 .player-list {
@@ -763,6 +772,10 @@
   }
 }
 
+.round-history-section + .button-row {
+  margin-top: 1rem;
+}
+
 .history-edit-button {
   flex-shrink: 0;
   padding: 0.65rem 0.9rem;
@@ -982,6 +995,7 @@
 
 /* Stats */
 .stats-bar-track {
+  position: relative;
   overflow: hidden;
   height: 0.65rem;
   border-radius: 999px;
@@ -999,6 +1013,10 @@
 
 .stats-bar-fill.player-tone {
   background: linear-gradient(90deg, #f2d78f, #d9af56);
+}
+
+.stats-bar-fill.is-negative {
+  background: linear-gradient(90deg, #d08a8a, #b56565);
 }
 
 .stats-table-wrapper {
@@ -1186,12 +1204,15 @@
   }
 
   .round-grid,
-  .result-grid,
   .field-grid,
   .compact-grid,
   .stats-summary-grid,
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .stats-grid > *,
@@ -1262,13 +1283,13 @@
   .board-tabs {
     gap: 0.5rem;
     flex-wrap: nowrap;
-    overflow-x: auto;
+    overflow-x: hidden;
     padding-top: 0.15rem;
     padding-bottom: 0.2rem;
   }
 
   .board-tab-button {
-    flex: 1 0 auto;
+    flex: 1 1 0;
     white-space: nowrap;
     text-align: center;
   }

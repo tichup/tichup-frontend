@@ -163,7 +163,7 @@ function StatsBarList({ title, items, tone }) {
               </div>
               <div className="stats-bar-track">
                 <div
-                  className={`stats-bar-fill ${tone}`}
+                  className={`stats-bar-fill ${tone} ${item.totalPoints < 0 ? "is-negative" : ""}`}
                   style={{
                     width: `${Math.max((Math.abs(item.totalPoints) / maxAbsValue) * 100, 6)}%`,
                   }}
