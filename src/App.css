@@ -531,6 +531,7 @@
   display: grid;
   gap: 0.55rem;
   text-align: left;
+  align-content: start;
 }
 
 .field span {
@@ -690,6 +691,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.45rem;
+  align-self: start;
 }
 
 .tichu-toggle-grid {
@@ -716,7 +718,7 @@
 }
 
 .rank-toggle-button {
-  padding: 0.8rem 0.5rem;
+  padding: 0.5rem 0.4rem;
 }
 
 .tichu-toggle-button {
