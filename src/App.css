@@ -417,9 +417,19 @@
 }
 
 .history-title {
-  margin: 0 0 0.85rem;
-  color: #f4f7fb;
-  font-size: 1rem;
+  margin: 0;
+  color: #aeb7c2;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.history-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
 }
 
 .player-list,
@@ -475,12 +485,10 @@
   font-size: 0.92rem;
 }
 
-.history-header .block-title {
-  margin-bottom: 0.2rem;
-}
-
 .history-header {
-  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.8rem;
 }
 
 .result-summary {
@@ -515,11 +523,6 @@
   font-size: 0.95rem;
 }
 
-.rank-field {
-  gap: 0.35rem;
-  align-self: start;
-}
-
 .field input,
 .field select {
   width: 100%;
@@ -543,6 +546,16 @@
 .stats-detail-list {
   display: grid;
   gap: 1rem;
+}
+
+.history-list {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  background: transparent;
 }
 
 .player-input-list {
@@ -794,6 +807,154 @@
   background: rgba(255, 255, 255, 0.05);
   color: #c9cfd7;
   font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.history-card {
+  padding: 0 1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.history-card:focus-visible {
+  outline: 1px solid rgba(217, 175, 86, 0.65);
+  outline-offset: 2px;
+}
+
+.history-card + .history-card {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.history-summary-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.1rem 0;
+}
+
+.history-summary-score {
+  color: #f4f7fb;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.history-summary-score:first-child {
+  text-align: left;
+}
+
+.history-summary-score:last-child {
+  text-align: right;
+}
+
+.history-summary-round {
+  color: #d9af56;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.history-details {
+  margin-top: 0;
+  padding: 0.9rem 1rem 1rem;
+  margin-bottom: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (min-width: 769px) {
+  .history-details {
+    padding: 1.35rem 1.45rem 1.4rem;
+  }
+}
+
+.result-grid.history-detail-grid {
+  grid-template-columns: 1fr;
+}
+
+.history-detail-grid .result-card {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.history-results-table-wrapper {
+  overflow-x: auto;
+}
+
+.history-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #d8dce2;
+  font-size: 0.92rem;
+}
+
+.history-results-table th,
+.history-results-table td {
+  padding: 0.8rem 0.7rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.history-results-table thead th {
+  color: #9ea7b3;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.history-results-table tbody th {
+  color: #f4f7fb;
+  text-align: center;
+}
+
+.history-results-table tbody tr:last-child th,
+.history-results-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.history-score-value {
+  font-weight: 700;
+}
+
+.history-score-value.is-positive {
+  color: #9be0b6;
+}
+
+.history-score-value.is-negative {
+  color: #ffb9b9;
+}
+
+.history-tichu-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2rem;
+  padding: 0.28rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.history-tichu-badge.is-success {
+  background: rgba(88, 164, 118, 0.18);
+  color: #cdebd8;
+}
+
+.history-tichu-badge.is-fail {
+  background: rgba(207, 93, 93, 0.16);
+  color: #ffd8d8;
+}
+
+.history-tichu-badge.is-neutral {
+  background: rgba(255, 255, 255, 0.08);
+  color: #c9cfd7;
 }
 
 .add-round-button {
@@ -1324,10 +1485,14 @@
   .result-card,
   .stats-card,
   .player-input-card,
-  .history-card,
   .stats-detail-item {
     padding: 1rem;
     border-radius: 18px;
+  }
+
+  .history-card {
+    padding: 0 1rem;
+    border-radius: 0;
   }
 
   .stats-summary-card {
@@ -1382,6 +1547,36 @@
 
   .history-action-row {
     margin-left: auto;
+  }
+
+  .history-details-actions .secondary-button {
+    width: auto;
+  }
+
+  .history-details-header {
+    align-items: center;
+  }
+
+  .history-details-header .history-edit-button {
+    width: auto;
+    padding: 0.5rem 0.75rem;
+    border-color: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.04);
+    color: #aeb7c2;
+    font-size: 0.84rem;
+  }
+
+  .result-grid.history-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .history-results-table {
+    font-size: 0.86rem;
+  }
+
+  .history-results-table th,
+  .history-results-table td {
+    padding: 0.72rem 0.55rem;
   }
 
   .modal-section {

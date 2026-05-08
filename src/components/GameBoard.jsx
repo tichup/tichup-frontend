@@ -80,6 +80,29 @@ function getWinnerSummary(teamTotals, targetScore) {
   };
 }
 
+function formatSignedPoints(value) {
+  if (value > 0) {
+    return `+${value}`;
+  }
+
+  return `${value}`;
+}
+
+function getTichuBadgeConfig(tichuResult) {
+  switch (tichuResult) {
+    case "large-success":
+      return { label: "LT", tone: "success" };
+    case "large-fail":
+      return { label: "LT", tone: "fail" };
+    case "small-success":
+      return { label: "ST", tone: "success" };
+    case "small-fail":
+      return { label: "ST", tone: "fail" };
+    default:
+      return { label: "-", tone: "neutral" };
+  }
+}
+
 function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   const [roundForm, setRoundForm] = useState(initialRoundForm);
   const [toastState, setToastState] = useState({ type: "", messages: [] });
@@ -88,6 +111,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   const [editingRoundId, setEditingRoundId] = useState(null);
   const [isWinnerCelebrationOpen, setIsWinnerCelebrationOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(getInitialActiveTab);
+  const [expandedRoundIds, setExpandedRoundIds] = useState([]);
 
   const playerRanks = useMemo(
     () =>
@@ -194,6 +218,12 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   function closeRoundModal() {
     resetRoundForm();
     setIsRoundModalOpen(false);
+  }
+
+  function toggleRoundSummary(roundId) {
+    setExpandedRoundIds((current) =>
+      current.includes(roundId) ? current.filter((id) => id !== roundId) : [...current, roundId],
+    );
   }
 
   function getRoundCalculation() {
@@ -340,8 +370,8 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
             <p className="panel-eyebrow">Game Board</p>
             <h1 className="panel-title">라운드를 기록하고 승패를 확인하세요</h1>
             <p className="panel-description">
-              저장된 라운드를 기준으로 누적 점수를 계산합니다. 통계 탭에서는 팀과 플레이어의
-              누적 흐름을 한눈에 볼 수 있습니다.
+              저장한 라운드를 기준으로 누적 점수를 계산합니다. 통계 탭에서는 팀과 플레이어의
+              흐름도 함께 볼 수 있습니다.
             </p>
           </div>
 
@@ -361,7 +391,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
             <p className="winner-label">Tie</p>
             <h2 className="winner-title">동점 상태입니다</h2>
             <p className="winner-description">
-              목표 점수에 도달했지만 동점이라 우승 팀이 아직 정해지지 않았습니다.
+              목표 점수에 도달했지만 동점이라 승리 팀이 아직 정해지지 않았습니다.
             </p>
           </section>
         ) : null}
@@ -417,48 +447,100 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
 
               {savedRounds.length ? (
                 <div className="history-list">
-                  {savedRounds.map((round) => (
-                    <article key={round.id} className="history-card">
-                      <div className="history-header">
-                        <div>
-                          <h3 className="block-title">라운드 {round.id}</h3>
-                        </div>
-                        <div className="history-action-row">
-                          <button
-                            type="button"
-                            className="secondary-button history-edit-button"
-                            onClick={() => openEditRoundModal(round)}
-                          >
-                            수정
-                          </button>
-                        </div>
-                      </div>
+                  {savedRounds.map((round) => {
+                    const isExpanded = expandedRoundIds.includes(round.id);
 
-                      <div className="result-grid">
-                        <div className="result-card">
-                          <h4 className="history-title">팀 점수</h4>
-                          <ul className="preview-list">
-                            {round.teamScores.map((teamScore) => (
-                              <li key={teamScore.teamId}>
-                                {teamScore.teamName}: {teamScore.totalPoints}점
-                              </li>
-                            ))}
-                          </ul>
+                    return (
+                      <article
+                        key={round.id}
+                        className="history-card"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => toggleRoundSummary(round.id)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            toggleRoundSummary(round.id);
+                          }
+                        }}
+                      >
+                        <div className="history-summary-bar">
+                          <strong className="history-summary-score">
+                            {round.teamScores[0]?.totalPoints ?? 0}
+                          </strong>
+                          <span className="history-summary-round">R{round.id}</span>
+                          <strong className="history-summary-score">
+                            {round.teamScores[1]?.totalPoints ?? 0}
+                          </strong>
                         </div>
 
-                        <div className="result-card">
-                          <h4 className="history-title">플레이어 결과</h4>
-                          <ul className="preview-list">
-                            {round.playerResults.map((playerResult) => (
-                              <li key={playerResult.playerId}>
-                                {playerResult.playerName}: {playerResult.totalPoints}점
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
+                        {isExpanded ? (
+                          <div className="history-details">
+                            <div className="history-details-header">
+                              <h4 className="history-title">상세 내역</h4>
+                              <button
+                                type="button"
+                                className="secondary-button history-edit-button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  openEditRoundModal(round);
+                                }}
+                              >
+                                수정
+                              </button>
+                            </div>
+
+                            <div className="result-grid history-detail-grid">
+                              <div className="result-card">
+                                <div className="history-results-table-wrapper">
+                                  <table className="history-results-table">
+                                    <thead>
+                                      <tr>
+                                        <th scope="col">플레이어</th>
+                                        <th scope="col">점수</th>
+                                        <th scope="col">티츄</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {round.playerResults.map((playerResult) => {
+                                        const tichuBadge = getTichuBadgeConfig(playerResult.tichu);
+
+                                        return (
+                                          <tr key={playerResult.playerId}>
+                                            <th scope="row">{playerResult.playerName}</th>
+                                            <td>
+                                              <span
+                                                className={`history-score-value ${
+                                                  playerResult.totalPoints > 0
+                                                    ? "is-positive"
+                                                    : playerResult.totalPoints < 0
+                                                      ? "is-negative"
+                                                      : ""
+                                                }`}
+                                              >
+                                                {formatSignedPoints(playerResult.totalPoints)}
+                                              </span>
+                                            </td>
+                                            <td>
+                                              <span
+                                                className={`history-tichu-badge is-${tichuBadge.tone}`}
+                                              >
+                                                {tichuBadge.label}
+                                              </span>
+                                            </td>
+                                          </tr>
+                                        );
+                                      })}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
+                      </article>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="result-card">
@@ -503,7 +585,9 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
             <div className="section-heading">
               <div>
                 <p className="panel-eyebrow">Round Input</p>
-                <h2 className="round-title">{isEditingRound ? "라운드 수정" : "새 라운드 입력"}</h2>
+                <h2 className="round-title">
+                  {isEditingRound ? `라운드 ${editingRoundId} 수정` : "새 라운드 입력"}
+                </h2>
               </div>
               <div className="action-row">
                 <button type="button" className="secondary-button" onClick={handleResetRoundForm}>
@@ -527,7 +611,7 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
                       </div>
 
                       <div className="field-grid compact-grid">
-                        <div className="field rank-field">
+                        <div className="field">
                           <span>순위</span>
                           <div
                             className="rank-toggle-group"

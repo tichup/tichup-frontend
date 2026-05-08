@@ -50,8 +50,8 @@ function GameSetup({ initialConfig, onBack, onStartGame }) {
             <p className="panel-eyebrow">Game Setup</p>
             <h1 className="panel-title">게임 시작 전 팀과 플레이어를 설정하세요</h1>
             <p className="panel-description">
-              목표 점수, 팀 이름, 플레이어 이름만 먼저 입력합니다. 각 팀은 2명으로 고정해두고
-              다음 단계에서 라운드 결과를 기록할 수 있도록 준비합니다.
+              목표 점수, 팀 이름, 플레이어 이름을 먼저 입력합니다. 각 팀은 2명으로 고정되어 있고,
+              다음 단계에서 라운드 결과를 기록할 수 있습니다.
             </p>
           </div>
         </div>
