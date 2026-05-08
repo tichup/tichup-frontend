@@ -156,6 +156,8 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
 
   const isEditingRound = editingRoundId !== null;
   const isRoundReadyToSave = totalEnteredPoints === 100 && hasAllRanksSelected;
+  const areAllRoundsExpanded =
+    savedRounds.length > 0 && expandedRoundIds.length === savedRounds.length;
 
   function updatePoint(playerIndex, value) {
     setRoundForm((current) => {
@@ -223,6 +225,12 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
   function toggleRoundSummary(roundId) {
     setExpandedRoundIds((current) =>
       current.includes(roundId) ? current.filter((id) => id !== roundId) : [...current, roundId],
+    );
+  }
+
+  function toggleAllRoundSummaries() {
+    setExpandedRoundIds((current) =>
+      current.length === savedRounds.length ? [] : savedRounds.map((round) => round.id),
     );
   }
 
@@ -438,10 +446,21 @@ function GameBoard({ gameConfig, onEditSetup, onResetGame }) {
             </div>
 
             <section className="round-history-section">
-              <div className="section-heading">
-                <div>
+              <div className="section-heading history-section-heading">
+                <div className="history-heading-copy">
                   <p className="panel-eyebrow">History</p>
-                  <h2 className="round-title">저장된 라운드</h2>
+                  <div className="history-heading-row">
+                    <h2 className="round-title">저장된 라운드</h2>
+                    {savedRounds.length ? (
+                      <button
+                        type="button"
+                        className="link-action-button"
+                        onClick={toggleAllRoundSummaries}
+                      >
+                        {areAllRoundsExpanded ? "전체 요약" : "전체 상세"}
+                      </button>
+                    ) : null}
+                  </div>
                 </div>
               </div>
 
