@@ -582,6 +582,20 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+@media (min-width: 769px) {
+  .team-tichu-card .stats-badge-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .team-tichu-card .stats-badge {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
 .player-input-header,
 .score-slider-header,
 .score-slider-scale,
