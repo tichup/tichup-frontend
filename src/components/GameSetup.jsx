@@ -84,7 +84,7 @@ function GameSetup({ initialConfig, onBack, onStartGame }) {
               </label>
 
               <label className="field">
-                <span>P1</span>
+                <span>Player 1</span>
                 <input
                   value={form.playerNames[0]}
                   placeholder={initialConfig.players[0].name}
@@ -93,7 +93,7 @@ function GameSetup({ initialConfig, onBack, onStartGame }) {
               </label>
 
               <label className="field">
-                <span>P2</span>
+                <span>Player 2</span>
                 <input
                   value={form.playerNames[1]}
                   placeholder={initialConfig.players[1].name}
@@ -113,7 +113,7 @@ function GameSetup({ initialConfig, onBack, onStartGame }) {
               </label>
 
               <label className="field">
-                <span>P3</span>
+                <span>Player 3</span>
                 <input
                   value={form.playerNames[2]}
                   placeholder={initialConfig.players[2].name}
@@ -122,7 +122,7 @@ function GameSetup({ initialConfig, onBack, onStartGame }) {
               </label>
 
               <label className="field">
-                <span>P4</span>
+                <span>Player 4</span>
                 <input
                   value={form.playerNames[3]}
                   placeholder={initialConfig.players[3].name}
